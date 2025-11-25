@@ -35,7 +35,6 @@ public class CsrfTokenFilter implements Filter {
                 return;
             }
         }
-
         chain.doFilter(httpRequest, httpResponse);
     }
 

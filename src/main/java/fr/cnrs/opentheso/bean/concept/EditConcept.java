@@ -338,7 +338,11 @@ public class EditConcept implements Serializable {
     }
 
     public void deleteConcept() {
-
+        if(!selectedTheso.getCurrentIdTheso().equalsIgnoreCase(conceptView.getNodeConcept().getConcept().getIdThesaurus())) {
+            MessageUtils.showWarnMessage("Attention !! un autre onglet utilise un autre thésaurus, veuillez le fermer pour éviter les erreurs");
+            PrimeFaces.current().executeScript("window.location.reload();");
+            return;
+        }
         if (roleOnThesaurusBean.getNodePreference() == null) {
             MessageUtils.showErrorMessage("Le thésaurus n'a pas de préférences !");
             return;

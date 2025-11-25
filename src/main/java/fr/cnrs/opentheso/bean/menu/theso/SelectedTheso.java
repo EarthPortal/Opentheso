@@ -532,8 +532,10 @@ public class SelectedTheso implements Serializable {
                     if(StringUtils.isNotEmpty(idGroupFromUri)) {
                         treeGroups.selectThisGroup(idGroupFromUri.trim());
                         rightBodySetting.setIndex("1");
-                    } else 
+                    } else {
                         indexSetting.setIsHomeSelected(true);
+                        conceptBean.setNodeConcept(null);
+                    }
                 }
             } else {
                 return;
