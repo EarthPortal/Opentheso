@@ -254,50 +254,38 @@ public interface SearchRepository extends JpaRepository<Concept, Integer> {
     );
 
     @Query(value = """
-                    SELECT
-                      pt.id_concept,
-                      t.lexical_value,
-                      t.id_term,
-                      c.status
-                    FROM term t
-                    JOIN preferred_term pt
-                      ON pt.id_term = t.id_term
-                     AND pt.id_thesaurus = t.id_thesaurus
-                    JOIN concept c
-                      ON c.id_concept = pt.id_concept
-                     AND c.id_thesaurus = pt.id_thesaurus
-                    WHERE c.status != 'CA'
-                      AND t.id_thesaurus = :idThesaurus
-                      AND (:idLang IS NULL OR t.lang = :idLang)
-                      AND ' ' || LTRIM(
-                            lower(
-                                unaccent(
-                                  replace(
-                                    replace(
-                                      replace(
-                                        replace(
-                                          replace(
-                                            replace(
-                                              replace(
-                                                replace(
-                                                  t.lexical_value, '[', ' '),
-                                                ']', ' '),
-                                              '(', ' '),
-                                            ')', ' '),
-                                          '~', ' '),
-                                        '-', ' '),
-                                      '''', ' '),  -- apostrophe
-                                    '`', ' ')       -- backtick
-                                )
-                            )
-                          ) || ' ' LIKE '% ' || lower(unaccent(:val)) || '%'
-                    ORDER BY
-                      CASE
-                        WHEN unaccent(lower(t.lexical_value)) ILIKE :val THEN 1
-                        WHEN unaccent(lower(t.lexical_value)) ILIKE CONCAT(:val, ' %') THEN 2
-                      END,
-                      unaccent(lower(t.lexical_value))
-                    LIMIT 50;
+            SELECT id_concept, lexical_value, id_term, status
+                 FROM (
+                     SELECT
+                            pt.id_concept,
+                            t.lexical_value,
+                            t.id_term,
+                            c.status,
+                            unaccent(lower(t.lexical_value)) AS sort_norm
+                     FROM preferred_term pt
+                     JOIN term t
+                         ON t.id_term = pt.id_term
+                        AND t.id_thesaurus = pt.id_thesaurus
+                     JOIN concept c
+                         ON pt.id_concept = c.id_concept
+                        AND pt.id_thesaurus = c.id_thesaurus
+                     WHERE c.status != 'CA'
+                       AND pt.id_thesaurus = :idThesaurus
+                       AND (:idLang IS NULL OR t.lang = :idLang)
+                       AND (
+                           unaccent(lower(t.lexical_value)) ILIKE CONCAT(unaccent(lower(:val)), '%')
+                           OR unaccent(lower(t.lexical_value)) ILIKE CONCAT('% ', unaccent(lower(:val)), '%')
+                           OR unaccent(lower(t.lexical_value)) ILIKE CONCAT('%-', unaccent(lower(:val)), '%')
+                           OR unaccent(lower(t.lexical_value)) ILIKE CONCAT('%_', unaccent(lower(:val)), '%')
+                           OR unaccent(lower(t.lexical_value)) ILIKE CONCAT('%;', unaccent(lower(:val)), '%')
+                           OR unaccent(lower(t.lexical_value)) ILIKE CONCAT('%''', unaccent(lower(:val)), '%')
+                           OR unaccent(lower(t.lexical_value)) ILIKE CONCAT('%ʿ', unaccent(lower(:val)), '%')
+                           OR unaccent(lower(t.lexical_value)) ILIKE CONCAT('%[', unaccent(lower(:val)), '%')
+                           OR unaccent(lower(t.lexical_value)) ILIKE CONCAT('%(', unaccent(lower(:val)), '%')
+                       )
+                 ) x
+                 ORDER BY x.sort_norm
+                 LIMIT 50;
             """, nativeQuery = true)
     List<Object[]> searchStartWithPreferred(
             @Param("val") String val,
@@ -366,7 +354,7 @@ public interface SearchRepository extends JpaRepository<Concept, Integer> {
     @Query(value = """
             SELECT id_concept, id_term, npt, pt, status
                          FROM (
-                             SELECT DISTINCT
+                             SELECT 
                                     pt.id_concept,
                                     t.id_term,
                                     npt.lexical_value AS npt,

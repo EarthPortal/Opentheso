@@ -447,6 +447,12 @@ public class Tree implements Serializable {
 
         propositionBean.setRubriqueVisible(false);
 
+        if(selectedNode == null) {
+            try {
+                selectedTheso.reloadSelectedTheso();
+            } catch (Exception ex){}
+            return;
+        }
         treeNodeDataSelect = (TreeNodeData) selectedNode.getData();
 
         if (!"facet".equals(node.getType())) {

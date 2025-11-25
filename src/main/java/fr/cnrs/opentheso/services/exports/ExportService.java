@@ -32,8 +32,10 @@ import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.jena.sparql.function.library.leviathan.log;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.jsoup.Jsoup;
@@ -55,7 +57,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExportService {
@@ -410,6 +412,7 @@ public class ExportService {
 
             for (String tab : tabs) {
                 sKOSResource.addMatch(tab.trim(), type);
+            //    log.info(textBrut);
             }
         }
     }
