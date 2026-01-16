@@ -206,7 +206,7 @@ public class ThesaurusService {
 
         var thesaurusLabel = thesaurusLabelRepository.findByIdThesaurusAndLang(idThesaurus, idLang);
         if (thesaurusLabel.isEmpty()) {
-            log.error("Le thésaurus n'a pas de Label dans sa langue source, id {}", idThesaurus);
+            log.debug("Le thésaurus n'a pas de Label dans sa langue source, id {}", idThesaurus);
             return "";
         }
 
@@ -228,7 +228,7 @@ public class ThesaurusService {
                 .id((int)thesaurusSeq)
                 .idThesaurus(idThesaurus)
                 .idArk("")
-                .isPrivate(false)
+                .isPrivate(true)
                 .created(new Date())
                 .modified(new Date())
                 .build());

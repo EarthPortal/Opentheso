@@ -22,7 +22,7 @@ public interface ThesaurusRepository extends JpaRepository<Thesaurus, String> {
     @Query(value = "SELECT * FROM thesaurus ORDER BY created DESC", nativeQuery = true)
     List<Thesaurus> findAllOrderByCreatedDesc();
 
-    @Query(value = "SELECT id_thesaurus FROM concept WHERE REPLACE(id_ark, '-', '') = REPLACE(:arkId, '-', '') LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT id_thesaurus FROM thesaurus WHERE REPLACE(id_ark, '-', '') = REPLACE(:arkId, '-', '') LIMIT 1", nativeQuery = true)
     Optional<String> findIdThesaurusByArkId(@Param("arkId") String arkId);
 
     @Query(value = "SELECT nextval('thesaurus_id_seq')", nativeQuery = true)
@@ -71,4 +71,26 @@ public interface ThesaurusRepository extends JpaRepository<Thesaurus, String> {
 
     @Query("SELECT c.idThesaurus FROM Concept c WHERE c.idHandle = :handleId")
     Optional<String> findThesaurusIdByHandle(@Param("handleId") String handleId);
+
+
+    // permet de corriger les incohérences des tops termes, un concept ne peut pas êter à la fois TopTerm et spécifique.
+    @Modifying
+    @Transactional
+    @Query(value = """
+        UPDATE concept c
+        SET top_concept = false
+        WHERE c.top_concept = true
+          AND c.id_thesaurus = :idThesaurus
+          AND EXISTS (
+              SELECT 1
+              FROM hierarchical_relationship hr
+              WHERE hr.id_thesaurus = c.id_thesaurus
+                AND (
+                    (hr.id_concept1 = c.id_concept AND hr.role = 'BT')
+                    OR
+                    (hr.id_concept2 = c.id_concept AND hr.role = 'NT')
+                )
+          )
+        """, nativeQuery = true)
+    int resetTopConceptsWithRelations(@Param("idThesaurus") String idThesaurus);
 }

@@ -9,6 +9,8 @@
         </encoder>
     </appender>
 
+
+
     <!-- Définir un appender pour les fichiers de logs avec rotation et compression -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- Le fichier log du jour en cours -->
@@ -40,6 +42,8 @@
             </pattern>
         </encoder>
     </appender>
+
+    <logger name="org.springframework.web.servlet.resource.NoResourceFoundException" level="ERROR" additivity="false" />
 
     <!-- Définir le niveau de log pour les environnements -->
 

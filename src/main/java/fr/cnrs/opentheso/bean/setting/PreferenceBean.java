@@ -9,6 +9,8 @@ import fr.cnrs.opentheso.services.PreferenceService;
 import fr.cnrs.opentheso.services.ThesaurusService;
 import fr.cnrs.opentheso.utils.MessageUtils;
 
+import fr.cnrs.opentheso.utils.SimpleCrypto;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import java.io.Serializable;
@@ -17,6 +19,8 @@ import jakarta.inject.Named;
 import jakarta.enterprise.context.SessionScoped;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 
 @Slf4j
@@ -37,6 +41,27 @@ public class PreferenceBean implements Serializable {
     private Preferences preferences;
     private List<NodeLangTheso> languagesOfThesaurus;
 
+    private String newPassArk;
+    private String actualPassArk;
+
+    private String newApiKeyOpenArk;
+    private String actualApiKeyOpenArk;
+
+    private String newPassHandle;
+    private String actualPassHandle;
+
+    private String newDeeplApiKey;
+    private String actualDeeplApiKey;
+
+    private SimpleCrypto cryptoService;
+
+    @Value("${crypto.openark.key}")
+    private String secretKey;
+
+    @PostConstruct
+    public void initCrypto() {
+        cryptoService = new SimpleCrypto(secretKey);
+    }
 
     public void init() {
 
@@ -49,6 +74,19 @@ public class PreferenceBean implements Serializable {
             log.error("Aucun paramètre n'est trouvé pour le thésaurus id {}", selectedTheso.getCurrentIdTheso());
             return;
         }
+        actualPassArk = preferences.getPassArk();
+        preferences.setPassArk("");
+
+        ///  gestion de la Clé d'API avec cryptage
+        actualApiKeyOpenArk = preferences.getApiKeyOpenArk();
+     //   SimpleCrypto crypto = new SimpleCrypto(actualApiKeyOpenArk);
+        preferences.setApiKeyOpenArk("");
+
+        actualPassHandle = preferences.getPassHandle();
+        preferences.setPassHandle("");
+
+        actualDeeplApiKey = preferences.getDeeplApiKey();
+        preferences.setDeeplApiKey("");
 
         languagesOfThesaurus = thesaurusService.getAllUsedLanguagesOfThesaurusNode(selectedTheso.getCurrentIdTheso(),
                 preferences.getSourceLang());
@@ -70,18 +108,28 @@ public class PreferenceBean implements Serializable {
                 preferences.setUseArk(preferences.isUseArk());
                 preferences.setUseArkLocal(false);
                 preferences.setUseHandle(false);
+                preferences.setUseOpenArk(false);
                 break;
             case "arklocal":
                 preferences.setUseArk(false);
                 preferences.setUseArkLocal(preferences.isUseArkLocal());
                 preferences.setUseHandle(false);
+                preferences.setUseOpenArk(false);
                 break;
             case "handle":
                 preferences.setUseArk(false);
                 preferences.setUseArkLocal(false);
                 preferences.setUseHandle(preferences.isUseHandle());
+                preferences.setUseOpenArk(false);
+                break;
+            case "openark":
+                preferences.setUseArk(false);
+                preferences.setUseArkLocal(false);
+                preferences.setUseHandle(false);
+                preferences.setUseOpenArk(preferences.isUseOpenArk());
+                break;
         }
-        preferenceService.setIdentifierFlags(selectedTheso.getCurrentIdTheso(), preferences.isUseArk(), preferences.isUseArkLocal(), preferences.isUseHandle());
+        preferenceService.setIdentifierFlags(selectedTheso.getCurrentIdTheso(), preferences.isUseArk(), preferences.isUseArkLocal(), preferences.isUseHandle(), preferences.isUseOpenArk());
     }
     
     public String getGoogleAnalytics() {
@@ -93,6 +141,37 @@ public class PreferenceBean implements Serializable {
         if (uriType == null) {
             return;
         }
+        // contrôle du mot de passe Ark
+        if(StringUtils.isNotBlank(newPassArk)){
+            preferences.setPassArk(newPassArk);
+        } else {
+            preferences.setPassArk(actualPassArk);
+        }
+
+        // contrôle de la clé d'API de OpenArk
+        String valueToStore;
+        if (newApiKeyOpenArk != null && !newApiKeyOpenArk.isBlank()) {
+            valueToStore = cryptoService.encrypt(newApiKeyOpenArk);
+        } else {
+            valueToStore = actualApiKeyOpenArk; // déjà chiffrée
+        }
+
+        preferences.setApiKeyOpenArk(valueToStore);
+        preferenceService.updateAllPreferenceUser(preferences);
+
+        // contrôle du mot de passe Handle
+        if(StringUtils.isNotBlank(newPassHandle)){
+            preferences.setPassHandle(newPassHandle);
+        } else {
+            preferences.setPassHandle(actualPassHandle);
+        }
+
+        // contrôle de la clé d'API de Deepl
+        if(StringUtils.isNotBlank(newDeeplApiKey)){
+            preferences.setDeeplApiKey(newDeeplApiKey);
+        } else {
+            preferences.setDeeplApiKey(actualDeeplApiKey);
+        }
 
         preferences.setOriginalUriIsArk(uriType.equalsIgnoreCase("ark"));
         preferences.setOriginalUriIsHandle(uriType.equalsIgnoreCase("handle"));
@@ -101,6 +180,18 @@ public class PreferenceBean implements Serializable {
         roleOnThesaurus.setNodePreference(preferenceService.getThesaurusPreferences(selectedTheso.getCurrentIdTheso()));
 
         MessageUtils.showInformationMessage("Préférences enregistrées avec succès");
+        newPassArk = null;
+        newApiKeyOpenArk = null;
+        newPassHandle = null;
+        newDeeplApiKey = null;
+        init();
+    }
+
+
+    // Pour utiliser la clé d'API ailleurs
+    public String getDecryptedApiKey(String apiKey) {
+        if (StringUtils.isBlank(apiKey)) return null;
+        return cryptoService.decrypt(apiKey);
     }
 
 }

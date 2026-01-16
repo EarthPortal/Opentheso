@@ -84,7 +84,15 @@ public interface ConceptRepository extends JpaRepository<Concept, Integer> {
 
     @Modifying
     @Transactional
-    void deleteAllByIdThesaurusAndIdConcept(String thesaurus, String idConcept);
+    @Query(value = """
+    DELETE FROM concept
+    WHERE id_thesaurus = :thesaurus
+      AND id_concept = :idConcept
+""", nativeQuery = true)
+    void deleteAllByIdThesaurusAndIdConcept(@Param("thesaurus") String thesaurus,
+                                            @Param("idConcept") String idConcept);
+
+
 
     @Modifying
     @Transactional
@@ -330,4 +338,16 @@ public interface ConceptRepository extends JpaRepository<Concept, Integer> {
             String arkId, Boolean isTopConcept, String handle, String doi, String prefLabels, String relations,
             String customRelations, String notes, String nonPrefLabels, String alignments, String images, String replacedBy,
             Boolean hasGps, String gps, Date created, Date modified, String dcterms);
+
+
+    @Transactional
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            value = "UPDATE concept SET top_concept = :isTopConcept, modified = CURRENT_TIMESTAMP " +
+                    "WHERE id_concept = :idConcept AND id_thesaurus = :idThesaurus",
+            nativeQuery = true
+    )
+    int updateTopConcept(@Param("idConcept") String idConcept,
+                         @Param("idThesaurus") String idThesaurus,
+                         @Param("isTopConcept") boolean isTopConcept);
 }

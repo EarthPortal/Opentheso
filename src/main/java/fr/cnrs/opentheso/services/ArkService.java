@@ -1,9 +1,15 @@
 package fr.cnrs.opentheso.services;
 
+import fr.cnrs.opentheso.client.ArkApiClient;
+import fr.cnrs.opentheso.client.ArkApiException;
+import fr.cnrs.opentheso.dto.ArkRequest;
+import fr.cnrs.opentheso.dto.ArkResponse;
 import fr.cnrs.opentheso.entites.Concept;
+import fr.cnrs.opentheso.entites.Preferences;
 import fr.cnrs.opentheso.models.nodes.NodeIdValue;
 import fr.cnrs.opentheso.repositories.ConceptRepository;
 import fr.cnrs.opentheso.repositories.UserRepository;
+import fr.cnrs.opentheso.utils.MessageUtils;
 import fr.cnrs.opentheso.utils.ToolsHelper;
 import fr.cnrs.opentheso.ws.ark.ArkHelper2;
 import jakarta.json.Json;
@@ -32,6 +38,9 @@ public class ArkService {
     private final ConceptRepository conceptRepository;
     private final TermService termService;
     private final UserRepository userRepository;
+    private final ArkApiClient arkApiClient;
+
+//    private final ArkApiClient arkApiClient;
 
     /**
      * Cette fonction regenerer tous les idArk des concepts fournis en paramètre
@@ -169,16 +178,17 @@ public class ArkService {
     public boolean updateArkIdOfConcept(String idConcept, String idThesaurus, String idArk) {
 
         log.debug("Mise à jour de l'id ark (nouvelle valeur {}) du concept id {}", idArk, idConcept);
-        var concept = conceptRepository.findByIdConceptAndIdThesaurus(idConcept, idThesaurus);
+    /*    var concept = conceptRepository.findByIdConceptAndIdThesaurus(idConcept, idThesaurus);
         if (concept.isEmpty()) {
             log.debug("Aucun concept n'est trouvé avec l'id {} dans le thesaurus id {}", idConcept, idThesaurus);
             return false;
         }
 
         concept.get().setIdArk(idArk);
-        concept.get().setModified(new Date());
-        concept.get().setNotation(concept.get().getNotation() == null ? "" : concept.get().getNotation());
-        conceptRepository.save(concept.get());
+        concept.get().setModified(new Date());*/
+   //     concept.get().setNotation(concept.get().getNotation() == null ? "" : concept.get().getNotation());
+        conceptRepository.setIdArk(idArk, new Date(), idConcept, idThesaurus);
+//        conceptRepository.save(concept.get());
         log.debug("Mise à jou de l'id Ark dans le concept id {} est terminée", idConcept);
         return true;
     }
@@ -249,5 +259,51 @@ public class ArkService {
 
         return concept.get();
     }
+
+    /* Générer les identifiants Ark en utilisant le serveur OpenArk */
+
+    public boolean generateArkWithOpenArk(String idThesaurus, List<String> idConcepts, String idLang, String creator,
+                                          String apiKey, Preferences preference) {
+
+        log.debug("Générer les idArk avec OpenArk");
+        if (preference == null || !preference.isUseOpenArk()) {
+            return false;
+        }
+
+        ArkResponse arkResult = null;
+        for (String idConcept : idConcepts) {
+            var concept = getConcept(idConcept, idThesaurus);
+            var idArk = concept.getIdArk();
+
+            if (StringUtils.isEmpty(idArk)) {
+                // Construire la requête ARK
+                ArkRequest request = new ArkRequest();
+                request.setArk(""); // vide si serveur doit générer
+                request.setNaan(preference.getNaanOpenArk());
+                request.setType(preference.getPrefixOpenArk());
+                request.setUrlTarget(preference.getCheminSite() + "?idc=" + idConcept + "&idt=" + idThesaurus);
+                request.setTitle(termService.getLexicalValueOfConcept(idConcept,idThesaurus, idLang));
+                request.setCreator(creator);
+
+                // Appeler le client
+                try {
+                    ArkResponse response = arkApiClient.createArk(request, preference.getServerOpenArk(), apiKey);
+                    idArk =  response.getArk().getArkId();
+                    if (!updateArkIdOfConcept(idConcept, idThesaurus, idArk)) {
+                        return false;
+                    }
+                }
+                catch (ArkApiException e) {
+                    log.warn("Échec génération ARK : {}", e.getMessage());
+                    MessageUtils.showWarnMessage("Échec génération ARK : " + e.getMessage());
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
+
 
 }

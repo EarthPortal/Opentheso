@@ -33,11 +33,10 @@ import fr.cnrs.opentheso.services.LdapService;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 import jakarta.faces.application.FacesMessage;
@@ -50,7 +49,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.jena.sparql.function.library.leviathan.log;
 import org.primefaces.PrimeFaces;
 import org.springframework.beans.factory.annotation.Value;
-import java.util.List;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Scope;
@@ -98,6 +96,38 @@ public class CurrentUser implements Serializable {
     //pour KeyCloak
     private boolean keyCloak = false;
     private String mail;
+
+
+
+    // gestion des messages d'erreurs de KeyCloak'
+    public String getLoginError() {
+        // Lire la session à chaque rendu
+        FacesContext fc = FacesContext.getCurrentInstance();
+        Map<String, Object> sessionMap = fc.getExternalContext().getSessionMap();
+
+        String messageError = (String) sessionMap.remove("LOGIN_ERROR_MESSAGE");
+        String messageInfo = (String) sessionMap.remove("LOGIN_INFO_MESSAGE");
+
+        if (messageError != null && !messageError.isEmpty()) {
+         //   loginError = message;
+
+            // Ajouter le message global pour PrimeFaces growl
+            fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Connexion impossible",
+                    messageError));
+        }
+        if (messageInfo != null && !messageInfo.isEmpty()) {
+            //   loginError = message;
+
+            // Ajouter le message global pour PrimeFaces growl
+            fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
+                    "",
+                    messageInfo));
+        }
+        return "";
+    }
+
+
 
     public void clear() {
         if (allAuthorizedProjectAsAdmin != null) {

@@ -81,6 +81,10 @@ public class EditThesaurusBean implements Serializable {
     public void init(NodeIdValue nodeIdValueOfTheso) {
         this.nodeIdValueOfThesaurus = nodeIdValueOfTheso;
         activeTabIndex = 0;
+        var thesaurus = thesaurusService.getThesaurusById(nodeIdValueOfThesaurus.getId());
+        if (thesaurus != null) {
+            arkIdOfThesaurus = thesaurus.getIdArk();
+        }
         init();
         thesaurusMetadataAdd.init(nodeIdValueOfTheso.getId());
     }
@@ -93,6 +97,13 @@ public class EditThesaurusBean implements Serializable {
         isPrivateThesaurus = thesaurus.getIsPrivate();
 
         var nodePreference = preferenceService.getThesaurusPreferences(nodeIdValueOfThesaurus.getId());
+        if(nodePreference == null) {
+            preferenceService.initPreferences(thesaurus.getIdThesaurus(), preferredLang);
+            nodePreference = preferenceService.getThesaurusPreferences(nodeIdValueOfThesaurus.getId());
+            if(nodePreference == null) {
+                return;
+            }
+        }
         preferredLang = nodePreference.getSourceLang();
         allLangs = languageRepository.findAll();
         languagesOfThesaurus = thesaurusService.getAllUsedLanguagesOfThesaurusNode(nodeIdValueOfThesaurus.getId(), preferredLang);

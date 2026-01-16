@@ -68,6 +68,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -348,15 +349,15 @@ public class ConceptService {
         return conceptRepository.findConceptIdFromLabel(idTheso, normalizedLabel, idLang).orElse(null);
     }
 
+    @Transactional
     public boolean deleteConcept(String idConcept, String idThesaurus) {
 
         log.debug("Suppression du Concept id {} avec ses relations et traductions", idConcept);
         var preferredTerm = preferredTermRepository.findByIdThesaurusAndIdConcept(idThesaurus, idConcept);
-        if (preferredTerm.isEmpty()) {
-            return false;
+        if (preferredTerm.isPresent()) {
+            termService.deleteTerm(preferredTerm.get().getIdTerm(), idThesaurus);
         }
 
-        termService.deleteTerm(preferredTerm.get().getIdTerm(), idThesaurus);
         relationService.deleteAllRelationOfConcept(idConcept, idThesaurus);
         noteService.deleteNotes(idConcept, idThesaurus);
         alignmentService.deleteAlignmentOfConcept(idConcept, idThesaurus);
@@ -484,7 +485,13 @@ public class ConceptService {
         concept.get().setNotation(concept.get().getNotation() == null ? "" : concept.get().getNotation());
         concept.get().setIdDoi(concept.get().getIdDoi() == null ? "" : concept.get().getIdDoi());
         concept.get().setIdArk(concept.get().getIdArk() == null ? "" : concept.get().getIdArk());
-        conceptRepository.save(concept.get());
+        try {
+            conceptRepository.save(concept.get());
+        } catch (DataIntegrityViolationException e) {
+            // Ignorer le doublon
+            log.debug("Doublon ignoré du concept id {}", idConcept);
+        }
+
         log.debug("Mise à jour de la date de modification du concept id {}", idConcept);
         return true;
     }
@@ -692,22 +699,11 @@ public class ConceptService {
         return CollectionUtils.isNotEmpty(concept);
     }
 
+    @Transactional
     public boolean setTopConcept(String idConcept, String idThesaurus, boolean isTopConcept) {
-
         log.debug("Mise à jour du status 'TopConcept' pour le concept {}", idConcept);
-        var concept = getConcept(idConcept, idThesaurus);
-        if (concept != null) {
-            concept.setTopConcept(isTopConcept);
-            concept.setNotation(StringUtils.isEmpty(concept.getNotation()) ? "" : concept.getNotation());
-            concept.setIdArk(StringUtils.isEmpty(concept.getIdArk()) ? "" : concept.getIdArk());
-            concept.setIdDoi(StringUtils.isEmpty(concept.getIdDoi()) ? "" : concept.getIdDoi());
-            concept.setIdHandle(StringUtils.isEmpty(concept.getIdHandle()) ? "" : concept.getIdHandle());
-            concept.setConceptType(StringUtils.isEmpty(concept.getConceptType()) ? "" : concept.getConceptType());
-            concept.setModified(new Date());
-            conceptRepository.save(concept);
-            return true;
-        }
-        return false;
+        int updated = conceptRepository.updateTopConcept(idConcept, idThesaurus, isTopConcept);
+        return updated > 0;
     }
 
     @Transactional

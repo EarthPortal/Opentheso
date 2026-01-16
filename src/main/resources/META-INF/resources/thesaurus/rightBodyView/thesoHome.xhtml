@@ -57,12 +57,20 @@
                     <div class="row">
                         <div class="col-10" style="margin-top: 3px">
                             <h:outputText value="#{langueBean.getMsg('home.permalink')}: " style="font-size: 13px; color: #858796"/>
-
                             <h:panelGroup rendered="#{roleOnThesaurus.nodePreference.originalUriIsArk}">
-                                <i class="pi pi-link" style="margin-right: 5px; color: #f47b2a; font-size: 13px;"/>
-                                <p:link href="#{not empty selectedThesaurus.getUriOfTheso(roleOnThesaurus.nodePreference) ? selectedThesaurus.getUriOfTheso(roleOnThesaurus.nodePreference) : '#'}"
-                                        value="#{selectedThesaurus.getUriOfTheso(roleOnThesaurus.nodePreference)}"
-                                        style="color: #164A78; font-size: 13px;color: #F47B2A;" />
+                                <h:panelGroup rendered="#{selectedThesaurus.arkId != null}">
+                                    <i class="pi pi-link" style="margin-right: 5px; color: #f47b2a; font-size: 13px;"/>
+                                    <p:link href="#{not empty selectedThesaurus.getUriOfTheso(roleOnThesaurus.nodePreference) ? selectedThesaurus.getUriOfTheso(roleOnThesaurus.nodePreference) : '#'}"
+                                            value="#{selectedThesaurus.getUriOfTheso(roleOnThesaurus.nodePreference)}"
+                                            style="color: #164A78; font-size: 13px;color: #F47B2A;" />
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{selectedThesaurus.arkId == null}">
+                                    <p:link href="#{request.contextPath}/?idt=#{selectedThesaurus.currentIdTheso}"
+                                            value="#{request.serverName}#{request.contextPath}/?idt=#{selectedThesaurus.currentIdTheso}"
+                                            style="font-size: 13px; color: #F47B2A;" >
+                                        <i class="pi pi-link" style="color: #43B572;" />
+                                    </p:link>
+                                </h:panelGroup>
                             </h:panelGroup>
                             <h:panelGroup rendered="#{!roleOnThesaurus.nodePreference.originalUriIsArk}">
                                 <p:link href="#{request.contextPath}/?idt=#{selectedThesaurus.currentIdTheso}"

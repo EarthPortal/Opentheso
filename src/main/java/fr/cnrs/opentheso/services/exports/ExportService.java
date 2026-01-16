@@ -109,7 +109,7 @@ public class ExportService {
 
                 resource.addLabel(p.getLexicalvalue(), p.getLang(), SKOSProperty.PREF_LABEL);
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 resource.addDate(dateFormat.format(p.getCreated()), SKOSProperty.CREATED);
                 resource.addDate(dateFormat.format(p.getModified()), SKOSProperty.MODIFIED);
 
@@ -249,7 +249,7 @@ public class ExportService {
                 }
             }
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             if (ObjectUtils.isNotEmpty(p.getCreated())) {
                 sKOSResource.addDate(dateFormat.format(p.getCreated()), SKOSProperty.CREATED);
             }

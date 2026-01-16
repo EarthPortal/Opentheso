@@ -422,7 +422,9 @@ public class GroupService {
 
     public List<String> getGroupsByThesaurus(String idThesaurus) {
 
+      //  var groups = conceptGroupRepository.findAllByIdThesaurus(idThesaurus);
         var groups = conceptGroupRepository.findAllByIdThesaurus(idThesaurus);
+
         if (CollectionUtils.isEmpty(groups)) {
             log.debug("Aucun group n'est disponible dans le thésaurus id {}", idThesaurus);
             return new ArrayList<>();
