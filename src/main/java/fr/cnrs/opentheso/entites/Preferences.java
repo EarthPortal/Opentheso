@@ -112,10 +112,10 @@ public class Preferences {
     @Column(name = "server_openark")
     private String serverOpenArk;
 
-    @Column(name = "naan_openark", insertable = false)
+    @Column(name = "naan_openark")
     private String naanOpenArk;
 
-    @Column(name = "prefix_openark", insertable = false)
+    @Column(name = "prefix_openark")
     private String prefixOpenArk;
 
     @Column(name = "api_key_openark")

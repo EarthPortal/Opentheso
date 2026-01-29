@@ -88,7 +88,7 @@ settings:
 # clé de cryptage pour les clés d'API OpenARK
 crypto:
   openark:
-    key:  # 32 caractères exactement
+    key: 12345678901234567890123456789012 # 32 caractères exactement
 
 certificats:
   admpriv: ./certificats/admpriv.bin
@@ -97,10 +97,10 @@ certificats:
 
 smpt:
   protocol: smtp
-  hostname: smtprelay.mondomaine.fr
+  hostname: smtprelay.cnrs.fr
   portNumber: 25
   authorization: false
-  mailFrom: opentheso@mondomaine.fr
+  mailFrom: opentheso@mom.fr
   transportMail: smtp
 
 neo4j:

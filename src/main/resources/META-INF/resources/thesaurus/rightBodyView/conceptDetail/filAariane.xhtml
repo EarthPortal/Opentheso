@@ -101,10 +101,17 @@
                 <p:menuitem rendered="#{(roleOnThesaurus.nodePreference.useArk or roleOnThesaurus.nodePreference.useArkLocal or roleOnThesaurus.nodePreference.useOpenArk) and (currentUser.nodeUser.isSuperAdmin() or roleOnThesaurus.isAdminOnThisThesaurus())}"
                             value="#{langueBean.getMsg('rightbody.concept.generate_ark')}"
                             disabled="false"
-                            actionListener="#{editConcept.infosArk()}"
                             update="idGenerateArk"
                             action="#{editConcept.reset('')}"
                             oncomplete="PF('generateArk').show();"
+                            style="font-size: 12px;" />
+
+                <p:menuitem rendered="#{(roleOnThesaurus.nodePreference.useOpenArk) and (currentUser.nodeUser.isSuperAdmin() or roleOnThesaurus.isAdminOnThisThesaurus())}"
+                            value="#{langueBean.getMsg('rightbody.concept.delete_ark')}"
+                            disabled="false"
+                            update="idDeleteArk"
+                            action="#{editConcept.reset('')}"
+                            oncomplete="PF('deleteArk').show();"
                             style="font-size: 12px;" />
 
                 <p:menuitem rendered="#{(roleOnThesaurus.nodePreference.useArk or roleOnThesaurus.nodePreference.useArkLocal) and (currentUser.nodeUser.isSuperAdmin() or roleOnThesaurus.isAdminOnThisThesaurus())}"
@@ -219,6 +226,7 @@
 
     <ui:include src="../../../dialog/concept/approveConcept.xhtml" />
     <ui:include src="../../../dialog/concept/generateArk.xhtml" />
+    <ui:include src="../../../dialog/concept/deleteArk.xhtml" />
     <ui:include src="../../../dialog/concept/generateHandle.xhtml" />
     <ui:include src="../../../dialog/concept/deleteHandle.xhtml" />
     <ui:include src="../../../dialog/concept/generateAllArk.xhtml" />    

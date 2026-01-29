@@ -397,14 +397,7 @@ public class SynonymBean implements Serializable {
     }
 
     private void refreshConceptDatas(int idUser) {
-
-        log.debug("Recherche des données du concept {}", conceptBean.getNodeConcept().getConcept().getIdConcept());
-        conceptBean.getConcept(selectedTheso.getCurrentIdTheso(), conceptBean.getNodeConcept().getConcept().getIdConcept(),
-                conceptBean.getSelectedLang(), currentUser);
-
-        log.debug("Mise à jour de la date de modification du concept {}", conceptBean.getNodeConcept().getConcept().getIdConcept());
-        conceptService.updateDateOfConcept(selectedTheso.getCurrentIdTheso(), conceptBean.getNodeConcept().getConcept().getIdConcept(), idUser);
-
+        conceptService.updateDateOfConcept(selectedTheso.getCurrentIdTheso(),conceptBean.getNodeConcept().getConcept().getIdConcept(), idUser);
         conceptDcTermRepository.save(ConceptDcTerm.builder()
                 .name(DCMIResource.CONTRIBUTOR)
                 .value(currentUser.getNodeUser().getName())

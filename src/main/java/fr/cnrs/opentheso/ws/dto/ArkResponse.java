@@ -1,4 +1,4 @@
-package fr.cnrs.opentheso.dto;
+package fr.cnrs.opentheso.ws.dto;
 
 import lombok.Data;
 

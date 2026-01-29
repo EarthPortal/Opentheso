@@ -260,7 +260,11 @@ public class CurrentUser implements Serializable {
                 user = user2.get();
             }
         } else {
-            user = userService.findByUsernameAndPassword(username, password);
+            // ancienne méthode d'authentification MD5, déprécié par #MR
+           // user = userService.findByUsernameAndPassword(username, password);
+
+            // Passage en BCrypt
+            user = userService.findByUsernameAndPasswordMigrated(username, password);
         }
 
         if (user == null) {

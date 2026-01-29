@@ -573,6 +573,22 @@ public class EditConcept implements Serializable {
                 conceptView.getSelectedLang(), currentUser);
     }
 
+    public void deleteArkWithOpenArk() {
+        ArrayList<String> idConcepts = new ArrayList<>();
+        if(roleOnThesaurusBean.getNodePreference() == null) return;
+        idConcepts.add(conceptView.getNodeConcept().getConcept().getIdConcept());
+        if(roleOnThesaurusBean.getNodePreference().isUseOpenArk()) {
+            String apiKeyOpenArk = preferenceBean.getDecryptedApiKey(roleOnThesaurusBean.getNodePreference().getApiKeyOpenArk());
+            arkService.deleteArkWithOpenArk(conceptView.getNodeConcept().getConcept().getIdThesaurus(),
+                    idConcepts, apiKeyOpenArk, roleOnThesaurusBean.getNodePreference());
+        }
+
+        conceptView.getConcept(conceptView.getNodeConcept().getConcept().getIdThesaurus(),
+                conceptView.getNodeConcept().getConcept().getIdConcept(),
+                conceptView.getSelectedLang(), currentUser);
+    }
+
+
     /**
      * permet de générer les identifiants Ark pour les concepts qui n'en ont pas
      * si un identifiant n'existe pas, il sera créé, sinon, il sera mis à jour.

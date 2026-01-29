@@ -1,4 +1,4 @@
-package fr.cnrs.opentheso.dto;
+package fr.cnrs.opentheso.ws.dto;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
 public class ArkRequest {
 
     private String ark;
-    private String naan;
+    private Integer naan;
     private String type;
     private String urlTarget;
     private String title;

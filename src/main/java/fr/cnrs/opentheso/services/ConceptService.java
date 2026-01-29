@@ -183,7 +183,7 @@ public class ConceptService {
         log.debug("Vérifier si le concept id {} est un top concept {}", idConcept, idThesaurus);
         var concept = conceptRepository.findByIdConceptAndIdThesaurus(idConcept, idThesaurus);
         if (concept.isEmpty()) {
-            log.error("Aucun concept n'est trouvé avec l'id {}", idConcept);
+            log.debug("Aucun concept n'est trouvé avec l'id {}", idConcept);
             return false;
         }
 
@@ -472,28 +472,15 @@ public class ConceptService {
     }
 
     public boolean updateDateOfConcept(String idThesaurus, String idConcept, int contributor) {
-
-        log.debug("Mise à jour de la date de mise à jour du concept id {}", idConcept);
-        var concept = conceptRepository.findByIdConceptAndIdThesaurus(idConcept, idThesaurus);
-        if (concept.isEmpty()) {
-            log.error("Aucun concept n'est trouvé avec l'id {}", idConcept);
+        log.debug("Mise à jour de la date du concept id {}", idConcept);
+        int rows = conceptRepository.updateDateOfConcept(idThesaurus, idConcept, contributor);
+        if (rows > 0) {
+            log.debug("Mise à jour réussie pour le concept {}", idConcept);
+            return true;
+        } else {
+            log.warn("Aucun concept trouvé pour idConcept={} et thesaurus={}", idConcept, idThesaurus);
             return false;
         }
-
-        concept.get().setModified(new Date());
-        concept.get().setContributor(contributor);
-        concept.get().setNotation(concept.get().getNotation() == null ? "" : concept.get().getNotation());
-        concept.get().setIdDoi(concept.get().getIdDoi() == null ? "" : concept.get().getIdDoi());
-        concept.get().setIdArk(concept.get().getIdArk() == null ? "" : concept.get().getIdArk());
-        try {
-            conceptRepository.save(concept.get());
-        } catch (DataIntegrityViolationException e) {
-            // Ignorer le doublon
-            log.debug("Doublon ignoré du concept id {}", idConcept);
-        }
-
-        log.debug("Mise à jour de la date de modification du concept id {}", idConcept);
-        return true;
     }
 
     public List<String> getIdsOfBranchWithoutLoop(String idConceptDeTete, String idThesaurus) {
@@ -722,13 +709,17 @@ public class ConceptService {
     public boolean updateNotation(String idConcept, String idThesaurus, String notation) {
 
         log.debug("Mise à jour du notation pour le concept {}", idConcept);
-        var concept = getConcept(idConcept, idThesaurus);
-        if (concept != null) {
-            concept.setNotation(notation);
-            conceptRepository.save(concept);
+        conceptRepository.updateNotation(idConcept, idThesaurus, notation);
+
+        int rowsAffected = conceptRepository.updateNotation(idConcept, idThesaurus, notation);
+
+        if (rowsAffected > 0) {
+            log.debug("Aucun concept trouvé avec cet idConcept/idThesaurus.");
             return true;
+        } else {
+            log.debug("Aucun concept trouvé avec cet idConcept/idThesaurus.");
+            return false;
         }
-        return false;
     }
 
     public boolean moveBranchFromConceptToConcept(String idConcept, List<String> idOldBTsToDelete, String idNewConceptBT,
@@ -915,7 +906,7 @@ public class ConceptService {
         List<Gps> nodeGps = gpsService.findByIdConceptAndIdThesoOrderByPosition(idConcept, idThesaurus);
         if (CollectionUtils.isNotEmpty(nodeGps)) {
             nodeConceptExport.setNodeGps(nodeGps.stream().map(element -> NodeGps.builder()
-                            .position(element.getPosition())
+                            .position(element.getPosition() != null ? element.getPosition() : 0)
                             .longitude(element.getLongitude())
                             .latitude(element.getLatitude())
                             .build())

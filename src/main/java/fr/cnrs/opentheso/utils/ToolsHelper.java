@@ -28,9 +28,12 @@ public class ToolsHelper {
     }
 
     public boolean isValidURI(String uriStr) {
+        if (uriStr == null || uriStr.isBlank()) {
+            return false;
+        }
         try {
             URI uri = new URI(uriStr);
-            return uri.getScheme() != null && (uri.getHost() != null || uri.getSchemeSpecificPart() != null);
+            return uri.isAbsolute();
         } catch (URISyntaxException e) {
             return false;
         }

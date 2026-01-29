@@ -333,11 +333,20 @@ public class ConceptAddService {
 
 
     // nouvelle version pour OpenArk
-
     public List<NodeIdValue> generateOpenArkId(String idThesaurus, List<String> idConcepts, String idLang, Preferences preferences, String apiKey) {
         if (preferences.isUseOpenArk()) {
             if(!arkService.generateArkWithOpenArk(idThesaurus, idConcepts, idLang,
                     currentUser.getNodeUser().getName(), apiKey, preferenceService.getThesaurusPreferences(idThesaurus))){
+                return null;
+            }
+            return new ArrayList<>();
+        }
+        return null;
+    }
+
+    public List<NodeIdValue> deleteArkWithOpenArk(String idThesaurus, List<String> idConcepts, String idLang, Preferences preferences, String apiKey) {
+        if (preferences.isUseOpenArk()) {
+            if(!arkService.deleteArkWithOpenArk(idThesaurus, idConcepts, apiKey, preferenceService.getThesaurusPreferences(idThesaurus))){
                 return null;
             }
             return new ArrayList<>();
