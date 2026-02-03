@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import fr.cnrs.opentheso.models.skosapi.SKOSProperty;
+import fr.cnrs.opentheso.utils.ToolsHelper;
+import jakarta.faces.context.FacesContext;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -640,11 +642,17 @@ public class CsvReadHelper {
             NodeAlignmentImport nodeAlignmentImport,
             CSVRecord record, ArrayList<String> headerSourceAlign) {
         String uri1;
+        ToolsHelper toolsHelper = new ToolsHelper();
 
         /// types alignements 1=exactMatch ; 2=closeMatch ; 3=broadMatch ; 4=relatedMatch ; 5=narrowMatch
         for (String alignSource : headerSourceAlign) {
             try {
                 uri1 = record.get(alignSource);
+                if(toolsHelper.isValidURI(uri1) == false) {
+                    log.error("Erreur lors de la lecture du fichier CSV : l'URI " + uri1 + " n'est pas valide.");
+                    message = "Erreur lors de la lecture du fichier CSV : l'URI " + uri1 + " n'est pas valide.";
+                    return null;
+                }
                 nodeAlignmentImport = getAlignmentSource(nodeAlignmentImport, alignSource, uri1);
             } catch (Exception e) {
             }            

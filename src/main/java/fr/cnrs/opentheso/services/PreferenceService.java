@@ -87,7 +87,7 @@ public class PreferenceService {
         return preference.get();
     }
 
-    public void setIdentifierFlags(String idThesaurus, boolean useArk, boolean useArkLocal, boolean useHandle) {
+    public void setIdentifierFlags(String idThesaurus, boolean useArk, boolean useArkLocal, boolean useHandle, boolean useOpenArk) {
 
         log.debug("Mise à jour des flags d'identifier du thésaurus {}", idThesaurus);
         var preference = preferencesRepository.findByIdThesaurus(idThesaurus);
@@ -100,6 +100,7 @@ public class PreferenceService {
         preference.get().setUseArk(useArk);
         preference.get().setUseArkLocal(useArkLocal);
         preference.get().setUseHandle(useHandle);
+        preference.get().setUseOpenArk(useOpenArk);
         preferencesRepository.save(preference.get());
     }
 

@@ -317,7 +317,7 @@ public class NoteService {
     public int getNbrNoteByGroup(String idGroup, String idThesaurus, String idLang) {
 
         log.debug("Recherche du nombre de notes dans les concepts qui appartiennent au groupe {}", idGroup);
-        var notesCount = noteRepository.countNotesByGroupAndLangAndThesaurus(idGroup, idLang, idThesaurus);
+        var notesCount = noteRepository.countNotesByGroupAndLangAndThesaurus(idGroup, idThesaurus, idLang);
         log.debug("{} notes trouvées", notesCount);
         return notesCount;
     }

@@ -13,6 +13,22 @@ import java.util.Optional;
 
 public interface ConceptGroupRepository extends JpaRepository<ConceptGroup, Integer> {
 
+    @Query("""
+        SELECT cg
+        FROM ConceptGroup cg
+        JOIN ConceptGroupLabel cgl
+            ON cgl.idGroup = cg.idGroup
+           AND cgl.idThesaurus = cg.idThesaurus
+        WHERE cg.idThesaurus = :idThesaurus
+          AND cgl.lang = :lang
+        ORDER BY LOWER(cgl.lexicalValue)
+    """)
+    List<ConceptGroup> findGroupsSortedByLexicalValue(
+            @Param("idThesaurus") String idThesaurus,
+            @Param("lang") String lang
+    );
+
+
     @Modifying
     @Transactional
     @Query("UPDATE ConceptGroup cg SET cg.isPrivate = :isPrivate WHERE cg.idGroup = :idGroup AND cg.idThesaurus = :idThesaurus")

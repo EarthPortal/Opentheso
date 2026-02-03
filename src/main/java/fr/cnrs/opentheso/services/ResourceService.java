@@ -57,7 +57,7 @@ public class ResourceService {
         var conceptDetails = resourceRepository.getFullConcept(idThesaurus, idConcept, idLang, offset, step, isPrivate);
 
         if (conceptDetails.isEmpty()) {
-            log.error("Aucun concept n'est trouvé avec l'id {} dans le thésaurus id {}", idConcept, idThesaurus);
+            log.debug("Aucun concept n'est trouvé avec l'id {} dans le thésaurus id {}", idConcept, idThesaurus);
             return null;
         }
 

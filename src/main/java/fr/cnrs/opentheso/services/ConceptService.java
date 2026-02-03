@@ -68,6 +68,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -182,7 +183,7 @@ public class ConceptService {
         log.debug("Vérifier si le concept id {} est un top concept {}", idConcept, idThesaurus);
         var concept = conceptRepository.findByIdConceptAndIdThesaurus(idConcept, idThesaurus);
         if (concept.isEmpty()) {
-            log.error("Aucun concept n'est trouvé avec l'id {}", idConcept);
+            log.debug("Aucun concept n'est trouvé avec l'id {}", idConcept);
             return false;
         }
 
@@ -348,15 +349,15 @@ public class ConceptService {
         return conceptRepository.findConceptIdFromLabel(idTheso, normalizedLabel, idLang).orElse(null);
     }
 
+    @Transactional
     public boolean deleteConcept(String idConcept, String idThesaurus) {
 
         log.debug("Suppression du Concept id {} avec ses relations et traductions", idConcept);
         var preferredTerm = preferredTermRepository.findByIdThesaurusAndIdConcept(idThesaurus, idConcept);
-        if (preferredTerm.isEmpty()) {
-            return false;
+        if (preferredTerm.isPresent()) {
+            termService.deleteTerm(preferredTerm.get().getIdTerm(), idThesaurus);
         }
 
-        termService.deleteTerm(preferredTerm.get().getIdTerm(), idThesaurus);
         relationService.deleteAllRelationOfConcept(idConcept, idThesaurus);
         noteService.deleteNotes(idConcept, idThesaurus);
         alignmentService.deleteAlignmentOfConcept(idConcept, idThesaurus);
@@ -471,22 +472,15 @@ public class ConceptService {
     }
 
     public boolean updateDateOfConcept(String idThesaurus, String idConcept, int contributor) {
-
-        log.debug("Mise à jour de la date de mise à jour du concept id {}", idConcept);
-        var concept = conceptRepository.findByIdConceptAndIdThesaurus(idConcept, idThesaurus);
-        if (concept.isEmpty()) {
-            log.error("Aucun concept n'est trouvé avec l'id {}", idConcept);
+        log.debug("Mise à jour de la date du concept id {}", idConcept);
+        int rows = conceptRepository.updateDateOfConcept(idThesaurus, idConcept, contributor);
+        if (rows > 0) {
+            log.debug("Mise à jour réussie pour le concept {}", idConcept);
+            return true;
+        } else {
+            log.warn("Aucun concept trouvé pour idConcept={} et thesaurus={}", idConcept, idThesaurus);
             return false;
         }
-
-        concept.get().setModified(new Date());
-        concept.get().setContributor(contributor);
-        concept.get().setNotation(concept.get().getNotation() == null ? "" : concept.get().getNotation());
-        concept.get().setIdDoi(concept.get().getIdDoi() == null ? "" : concept.get().getIdDoi());
-        concept.get().setIdArk(concept.get().getIdArk() == null ? "" : concept.get().getIdArk());
-        conceptRepository.save(concept.get());
-        log.debug("Mise à jour de la date de modification du concept id {}", idConcept);
-        return true;
     }
 
     public List<String> getIdsOfBranchWithoutLoop(String idConceptDeTete, String idThesaurus) {
@@ -692,22 +686,11 @@ public class ConceptService {
         return CollectionUtils.isNotEmpty(concept);
     }
 
+    @Transactional
     public boolean setTopConcept(String idConcept, String idThesaurus, boolean isTopConcept) {
-
         log.debug("Mise à jour du status 'TopConcept' pour le concept {}", idConcept);
-        var concept = getConcept(idConcept, idThesaurus);
-        if (concept != null) {
-            concept.setTopConcept(isTopConcept);
-            concept.setNotation(StringUtils.isEmpty(concept.getNotation()) ? "" : concept.getNotation());
-            concept.setIdArk(StringUtils.isEmpty(concept.getIdArk()) ? "" : concept.getIdArk());
-            concept.setIdDoi(StringUtils.isEmpty(concept.getIdDoi()) ? "" : concept.getIdDoi());
-            concept.setIdHandle(StringUtils.isEmpty(concept.getIdHandle()) ? "" : concept.getIdHandle());
-            concept.setConceptType(StringUtils.isEmpty(concept.getConceptType()) ? "" : concept.getConceptType());
-            concept.setModified(new Date());
-            conceptRepository.save(concept);
-            return true;
-        }
-        return false;
+        int updated = conceptRepository.updateTopConcept(idConcept, idThesaurus, isTopConcept);
+        return updated > 0;
     }
 
     @Transactional
@@ -726,13 +709,17 @@ public class ConceptService {
     public boolean updateNotation(String idConcept, String idThesaurus, String notation) {
 
         log.debug("Mise à jour du notation pour le concept {}", idConcept);
-        var concept = getConcept(idConcept, idThesaurus);
-        if (concept != null) {
-            concept.setNotation(notation);
-            conceptRepository.save(concept);
+        conceptRepository.updateNotation(idConcept, idThesaurus, notation);
+
+        int rowsAffected = conceptRepository.updateNotation(idConcept, idThesaurus, notation);
+
+        if (rowsAffected > 0) {
+            log.debug("Aucun concept trouvé avec cet idConcept/idThesaurus.");
             return true;
+        } else {
+            log.debug("Aucun concept trouvé avec cet idConcept/idThesaurus.");
+            return false;
         }
-        return false;
     }
 
     public boolean moveBranchFromConceptToConcept(String idConcept, List<String> idOldBTsToDelete, String idNewConceptBT,
@@ -876,7 +863,6 @@ public class ConceptService {
      * IdArk si Ark est actif
      */
     public NodeConceptExport getConceptForExport(String idConcept, String idThesaurus, boolean isCandidatExport) {
-
         NodeConceptExport nodeConceptExport = new NodeConceptExport();
 
         String htmlTagsRegEx = "<[^>]*>";
@@ -919,7 +905,7 @@ public class ConceptService {
         List<Gps> nodeGps = gpsService.findByIdConceptAndIdThesoOrderByPosition(idConcept, idThesaurus);
         if (CollectionUtils.isNotEmpty(nodeGps)) {
             nodeConceptExport.setNodeGps(nodeGps.stream().map(element -> NodeGps.builder()
-                            .position(element.getPosition())
+                            .position(element.getPosition() != null ? element.getPosition() : 0)
                             .longitude(element.getLongitude())
                             .latitude(element.getLatitude())
                             .build())
@@ -936,7 +922,7 @@ public class ConceptService {
             if (CollectionUtils.isNotEmpty(messages)) {
                 nodeConceptExport.setMessages(messages.stream().map(element -> MessageDto.builder()
                                 .msg(element.getValue())
-                                .date(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(element.getDate()))
+                                .date(element.getDate())
                                 .idUser(element.getIdUser())
                                 .build())
                         .toList());

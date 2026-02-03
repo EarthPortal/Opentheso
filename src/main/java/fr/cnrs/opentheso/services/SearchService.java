@@ -594,6 +594,7 @@ public class SearchService {
         value = fr.cnrs.opentheso.utils.StringUtils.unaccentLowerString(
                 fr.cnrs.opentheso.utils.StringUtils.convertString(value.trim())
         );
+        value = fr.cnrs.opentheso.utils.StringUtils.addQuotes( value);
 
         // Constructions des filtres dynamiques
         String multiValuesPT = buildLangAndGroupFilters("term.lang", "concept_group_concept.idgroup", idLang, idGroups);

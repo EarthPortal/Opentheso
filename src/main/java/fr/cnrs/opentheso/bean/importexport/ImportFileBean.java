@@ -647,8 +647,9 @@ public class ImportFileBean implements Serializable {
                 if (nodeAlignmentImports != null) {
                     if (nodeAlignmentImports.isEmpty()) {
                         haveError = true;
+                        error.append(csvReadHelper.getMessage());
                         error.append(System.getProperty("line.separator"));
-                        error.append("La lecture a échouée, vérifiez le séparateur des colonnes !!");
+                        error.append("La lecture a échouée, vérifiez peut être le séparateur des colonnes !!");
                         warning = "";
                     } else {
                         total = nodeAlignmentImports.size();

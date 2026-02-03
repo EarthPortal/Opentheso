@@ -15,12 +15,14 @@ import jakarta.faces.context.FacesContext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import jakarta.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.event.RowEditEvent;
+import org.springframework.dao.DataIntegrityViolationException;
 
-
+@Slf4j
 @Getter
 @Setter
 @SessionScoped
@@ -87,14 +89,21 @@ public class ThesaurusMetadataAdd implements Serializable{
         }
 
         if(dcElementTemp.getId() == -1) {
-            var tmp = thesaurusDcTermRepository.save(ThesaurusDcTerm.builder()
-                    .idThesaurus(idTheso)
-                    .name(dcElementTemp.getName())
-                    .value(dcElementTemp.getValue())
-                    .language(dcElementTemp.getLanguage())
-                    .dataType(dcElementTemp.getType())
-                    .build());
-            dcElementTemp.setId(tmp.getId().intValue());
+            try {
+                var tmp = thesaurusDcTermRepository.save(ThesaurusDcTerm.builder()
+                        .idThesaurus(idTheso)
+                        .name(dcElementTemp.getName())
+                        .value(dcElementTemp.getValue())
+                        .language(dcElementTemp.getLanguage())
+                        .dataType(dcElementTemp.getType())
+                        .build());
+                dcElementTemp.setId(tmp.getId().intValue());
+            }
+            catch (DataIntegrityViolationException e) {
+                log.debug("DC Term déjà existant, insertion ignorée : {} {} {}",
+                        idTheso, dcElementTemp.getName(), dcElementTemp.getValue());
+            }
+
         } else {
             var tmp = thesaurusDcTermRepository.findById(dcElementTemp.getId());
             if (tmp.isPresent()) {
@@ -102,7 +111,12 @@ public class ThesaurusMetadataAdd implements Serializable{
                 tmp.get().setLanguage(dcElementTemp.getLanguage());
                 tmp.get().setValue(dcElementTemp.getValue());
                 tmp.get().setDataType(dcElementTemp.getType());
-                thesaurusDcTermRepository.save(tmp.get());
+                try {
+                    thesaurusDcTermRepository.save(tmp.get());
+                } catch (DataIntegrityViolationException e) {
+                    log.debug("DC Term déjà existant, insertion ignorée : {} {} {}",
+                            idTheso, dcElementTemp.getName(), dcElementTemp.getValue());
+                }
             }
         } 
         FacesMessage msg = new FacesMessage("Dcterms updated", dcElementTemp.getValue());

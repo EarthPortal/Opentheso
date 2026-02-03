@@ -8,11 +8,16 @@ server:
   servlet:
     context-path: /
     session:
-      timeout: 120m
+      timeout: 30m
   error:
     path: /errorPages/error500.xhtml
     whitelabel:
       enabled: false
+
+logging:
+  level:
+    org.springframework.web.servlet.resource: ERROR
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: ERROR
 
 primefaces:
   uploader: native
@@ -32,13 +37,15 @@ spring:
   application:
     name: opentheso
 
+  thymeleaf:
+    check-template-location: false
   servlet:
     multipart:
       enabled: true
       max-file-size: 100MB  # Définit la taille max d'un fichier
       max-request-size: 100MB  # Taille totale max de la requête
   datasource:
-    url: jdbc:postgresql://localhost:5433/mom
+    url: jdbc:postgresql://localhost:5433/opentheso
     password: opentheso
     username: opentheso
   jpa:
@@ -58,8 +65,30 @@ spring:
       path: /graphiql
       endpoint: /graphql
 
+  # Connexion de KeyCloak
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          keycloak:
+#            client-id: opentheso
+#            client-secret:
+#            provider: keycloak
+#            authorization-grant-type: authorization_code
+#            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+#            scope: openid, profile, email
+#        provider:
+#          keycloak:
+#            issuer-uri: https://login.server.net/realms/server
+
+
 settings:
   workLanguage: fr
+
+# clé de cryptage pour les clés d'API OpenARK
+crypto:
+  openark:
+    key: 12345678901234567890123456789012 # 32 caractères exactement
 
 certificats:
   admpriv: ./certificats/admpriv.bin
@@ -68,10 +97,10 @@ certificats:
 
 smpt:
   protocol: smtp
-  hostname: smtprelay.mondomaine.fr
+  hostname: smtprelay.cnrs.fr
   portNumber: 25
   authorization: false
-  mailFrom: opentheso@mondomaine.fr
+  mailFrom: opentheso@mom.fr
   transportMail: smtp
 
 neo4j:

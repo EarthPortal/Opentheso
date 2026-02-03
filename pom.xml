@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cnrs.opentheso</groupId>
     <artifactId>opentheso</artifactId>
-    <version>25.11.01</version>
+    <version>26.02.01</version>
     <packaging>jar</packaging>
     <name>opentheso</name>
 
@@ -177,6 +177,7 @@
             <version>${commons-compress.version}</version>
         </dependency>
 
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -191,7 +192,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
-            <scope>provided</scope>
+           <!-- <scope>provided</scope> -->
         </dependency>
 
         <dependency>
@@ -450,7 +451,7 @@
         <handle-client.version>9.3.1</handle-client.version>
         <rdf4j.version>5.0.1</rdf4j.version>
         <graphql-java.version>230521-nf-execution</graphql-java.version>
-        <jsoup.version>1.18.1</jsoup.version>
+        <jsoup.version>1.21.2</jsoup.version>
         <protobuf.version>4.29.0-RC1</protobuf.version>
         <leaflet.version>1.8.0</leaflet.version>
         <virt_jena3.version>3.0</virt_jena3.version>

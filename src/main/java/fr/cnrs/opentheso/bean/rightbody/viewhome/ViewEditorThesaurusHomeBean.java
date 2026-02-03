@@ -11,6 +11,8 @@ import fr.cnrs.opentheso.utils.MessageUtils;
 
 import java.io.Serializable;
 import java.util.List;
+
+import fr.cnrs.opentheso.utils.ToolsHelper;
 import jakarta.inject.Named;
 import jakarta.enterprise.context.SessionScoped;
 import lombok.Getter;
@@ -46,6 +48,8 @@ public class ViewEditorThesaurusHomeBean implements Serializable {
     public void initText(String idLanguage, String idThesaurus) {
 
         text = thesaurusEditService.getHtmlPage(idThesaurus, idLanguage);
+        ToolsHelper toolsHelper = new ToolsHelper();
+        text = toolsHelper.normalizeHtml(text);
         isInEditing = true;
         isViewPlainText = false;
         colorOfHtmlButton = "#F49F66;";
@@ -69,7 +73,8 @@ public class ViewEditorThesaurusHomeBean implements Serializable {
      * permet d'ajouter un copyright, s'il n'existe pas, on le créé,sinon, on applique une mise à jour 
      */
     public void updateThesaurusHomePage(String idLanguage, String idThesaurus) {
-
+        ToolsHelper toolsHelper = new ToolsHelper();
+        text = toolsHelper.normalizeHtml(text);
         var result = thesaurusEditService.updateThesaurusHomePage(idThesaurus, idLanguage, text);
         if (ObjectUtils.isEmpty(result)){
             MessageUtils.showErrorMessage("L'ajout a échoué !");
