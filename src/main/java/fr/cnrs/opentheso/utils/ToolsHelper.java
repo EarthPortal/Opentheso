@@ -4,6 +4,10 @@ package fr.cnrs.opentheso.utils;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Entities;
+
 public class ToolsHelper {
 
     public static String getNewId(int length, boolean isUpperCase, boolean isUseNoidCheck) {
@@ -37,6 +41,23 @@ public class ToolsHelper {
         } catch (URISyntaxException e) {
             return false;
         }
+    }
+
+    public String normalizeHtml(String html) {
+        if (html == null || html.isBlank()) {
+            return "";
+        }
+
+        Document doc = Jsoup.parseBodyFragment(html);
+
+        // paramètres de sortie propres
+        doc.outputSettings()
+                .prettyPrint(true)               // indentation
+                .indentAmount(2)
+                .syntax(Document.OutputSettings.Syntax.html)
+                .escapeMode(Entities.EscapeMode.base);
+
+        return doc.body().html();
     }
 
 }

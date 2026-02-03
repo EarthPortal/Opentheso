@@ -863,7 +863,6 @@ public class ConceptService {
      * IdArk si Ark est actif
      */
     public NodeConceptExport getConceptForExport(String idConcept, String idThesaurus, boolean isCandidatExport) {
-
         NodeConceptExport nodeConceptExport = new NodeConceptExport();
 
         String htmlTagsRegEx = "<[^>]*>";
@@ -923,7 +922,7 @@ public class ConceptService {
             if (CollectionUtils.isNotEmpty(messages)) {
                 nodeConceptExport.setMessages(messages.stream().map(element -> MessageDto.builder()
                                 .msg(element.getValue())
-                                .date(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(element.getDate()))
+                                .date(element.getDate())
                                 .idUser(element.getIdUser())
                                 .build())
                         .toList());

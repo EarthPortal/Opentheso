@@ -99,21 +99,29 @@ public class ModifyUserBean implements Serializable {
         superAdminBean.init();
     }
 
-    public void updatePassword() {
+    public boolean updatePassword() {
 
         if (StringUtils.isEmpty(passWord1)) {
             MessageUtils.showErrorMessage("Un mot de passe est obligatoire");
-            return;
+            return false;
         }
 
         if (StringUtils.isEmpty(passWord2)) {
             MessageUtils.showErrorMessage("Un mot de passe est obligatoire");
-            return;
+            return false;
         }
 
         if (!passWord1.equals(passWord2)) {
             MessageUtils.showErrorMessage("Mot de passe non identique");
-            return;
+            return false;
+        }
+
+        if (!passWord1.matches(".*[A-Z].*") ||
+                !passWord1.matches(".*[a-z].*") ||
+                !passWord1.matches(".*\\d.*") ||
+                !passWord1.matches(".*[^A-Za-z\\d].*")) {
+            MessageUtils.showErrorMessage("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial");
+            return false;
         }
 
         // On encode le mot de passe avec BCrypt
@@ -127,6 +135,7 @@ public class ModifyUserBean implements Serializable {
 
         // Rafraîchir la sélection ou l'affichage si nécessaire
         selectUser(nodeUser.getId());
+        return true;
     }
 
     public void updateApiKey() {

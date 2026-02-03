@@ -26,6 +26,9 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -378,6 +381,7 @@ public class UserService {
         };
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<String> getThesaurusOfUserAsAdmin(int idUser) {
         log.debug("Recherche des thésaurus où l'utilisateur ID={} est administrateur...", idUser);
 

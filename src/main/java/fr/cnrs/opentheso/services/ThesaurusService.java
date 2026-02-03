@@ -21,9 +21,12 @@ import fr.cnrs.opentheso.repositories.ThesaurusRepository;
 import fr.cnrs.opentheso.repositories.UserGroupThesaurusRepository;
 import fr.cnrs.opentheso.repositories.UserRoleOnlyOnRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
@@ -236,6 +239,7 @@ public class ThesaurusService {
         log.debug("Enregistrement terminé du nouveau thésaurus {}", thesaurus.getIdThesaurus());
         return thesaurus.getIdThesaurus();
     }
+
 
     public void setThesaurusVisibility(String idThesaurus, boolean isPrivateTheso) {
 
