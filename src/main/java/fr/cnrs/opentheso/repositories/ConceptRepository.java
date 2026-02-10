@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -289,6 +290,20 @@ public interface ConceptRepository extends JpaRepository<Concept, Integer> {
                   AND c.modified >= :startDate
             """)
     List<String> findConceptIdsModifiedSince(@Param("idThesaurus") String idThesaurus, @Param("startDate") LocalDate startDate);
+
+
+    @Query("""
+    SELECT c.idConcept
+    FROM Concept c
+    WHERE c.idThesaurus = :idThesaurus
+      AND c.status <> 'CA'
+      AND c.modified >= :startDate
+""")
+    List<String> findConceptsModifiedSince(
+            @Param("idThesaurus") String idThesaurus,
+            @Param("startDate") Date startDate
+    );
+
 
     boolean existsByIdConceptAndIdThesaurus(String idConcept, String idThesaurus);
 
