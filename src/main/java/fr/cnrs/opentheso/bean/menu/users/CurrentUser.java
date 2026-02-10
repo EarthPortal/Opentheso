@@ -29,7 +29,6 @@ import fr.cnrs.opentheso.bean.rightbody.viewhome.ProjectBean;
 import fr.cnrs.opentheso.bean.rightbody.viewhome.ViewEditorHomeBean;
 import fr.cnrs.opentheso.bean.search.SearchBean;
 import fr.cnrs.opentheso.entites.UserGroupLabel;
-import fr.cnrs.opentheso.services.LdapService;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -83,7 +82,6 @@ public class CurrentUser implements Serializable {
     private final ViewEditorHomeBean viewEditorHomeBean;
     private final ProjectService projectService;
     private final UserService userService;
-    private final LdapService ldapService;
     private final ThesaurusService thesaurusService;
     private final PreferenceService preferenceService;
     private final UserRoleGroupService userRoleGroupService;

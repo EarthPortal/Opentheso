@@ -74,7 +74,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1172,8 +1174,11 @@ public class ConceptService {
 
     public List<String> getIdConceptFromDate(String idThesaurus, String dateStr) {
         try {
-            var startDate = LocalDate.parse(dateStr);
-            return conceptRepository.findConceptIdsModifiedSince(idThesaurus, startDate);
+            LocalDate localDate = LocalDate.parse(dateStr);
+            Date startDate = Date.from(
+                    localDate.atStartOfDay(ZoneOffset.UTC).toInstant()
+            );
+            return conceptRepository.findConceptsModifiedSince(idThesaurus, startDate);
         } catch (DateTimeParseException e) {
             log.error("Format de date invalide : {}", dateStr, e);
             return Collections.emptyList();
