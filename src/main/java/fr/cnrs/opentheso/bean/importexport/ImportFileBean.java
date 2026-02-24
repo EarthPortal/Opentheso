@@ -1,6 +1,7 @@
 package fr.cnrs.opentheso.bean.importexport;
 
 import fr.cnrs.opentheso.entites.ConceptDcTerm;
+import fr.cnrs.opentheso.entites.HierarchicalRelationship;
 import fr.cnrs.opentheso.entites.LanguageIso639;
 import fr.cnrs.opentheso.entites.UserGroupLabel;
 import fr.cnrs.opentheso.models.alignment.NodeAlignment;
@@ -17,23 +18,8 @@ import fr.cnrs.opentheso.models.relations.NodeDeprecated;
 import fr.cnrs.opentheso.models.relations.NodeReplaceValueByValue;
 import fr.cnrs.opentheso.models.search.NodeSearchMini;
 import fr.cnrs.opentheso.models.terms.Term;
-import fr.cnrs.opentheso.repositories.ConceptDcTermRepository;
-import fr.cnrs.opentheso.repositories.LanguageRepository;
-import fr.cnrs.opentheso.repositories.NonPreferredTermRepository;
-import fr.cnrs.opentheso.repositories.PreferredTermRepository;
-import fr.cnrs.opentheso.repositories.UserGroupLabelRepository;
-import fr.cnrs.opentheso.services.AlignmentService;
-import fr.cnrs.opentheso.services.ArkService;
-import fr.cnrs.opentheso.services.ConceptAddService;
-import fr.cnrs.opentheso.services.ConceptService;
-import fr.cnrs.opentheso.services.GroupService;
-import fr.cnrs.opentheso.services.ImageService;
-import fr.cnrs.opentheso.services.NonPreferredTermService;
-import fr.cnrs.opentheso.services.NoteService;
-import fr.cnrs.opentheso.services.PreferenceService;
-import fr.cnrs.opentheso.services.RelationGroupService;
-import fr.cnrs.opentheso.services.SearchService;
-import fr.cnrs.opentheso.services.ThesaurusService;
+import fr.cnrs.opentheso.repositories.*;
+import fr.cnrs.opentheso.services.*;
 import fr.cnrs.opentheso.services.imports.rdf4j.ImportRdf4jHelper;
 import fr.cnrs.opentheso.services.imports.rdf4j.ReadRDF4JNewGen;
 import fr.cnrs.opentheso.bean.candidat.CandidatBean;
@@ -60,8 +46,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +80,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ImportFileBean implements Serializable {
 
+    private final RelationService relationService;
+    private final ConceptRepository conceptRepository;
+    private final HierarchicalRelationshipRepository hierarchicalRelationshipRepository;
     @Value("${settings.workLanguage:fr}")
     private String workLanguage;
 
@@ -653,6 +642,68 @@ public class ImportFileBean implements Serializable {
                         warning = "";
                     } else {
                         total = nodeAlignmentImports.size();
+                        uri = "";//csvReadHelper.getUri();
+                        loadDone = true;
+                        BDDinsertEnable = true;
+                        info = "File correctly loaded";
+                        PrimeFaces.current().executeScript("PF('waitDialog').hide();");
+                    }
+                }
+            } catch (Exception e) {
+                haveError = true;
+                error.append(System.getProperty("line.separator"));
+                error.append(e.toString());
+            } finally {
+                showError();
+            }
+        }
+        PrimeFaces.current().executeScript("PF('waitDialog').hide();");
+    }
+
+    /**
+     * permet de charger un fichier en Csv
+     *
+     * @param event
+     */
+    public void loadFileRelatedCsv(FileUploadEvent event) {
+        initError();
+        if (!PhaseId.INVOKE_APPLICATION.equals(event.getPhaseId())) {
+            event.setPhaseId(PhaseId.INVOKE_APPLICATION);
+            event.queue();
+        } else {
+            ArrayList<String> headerRelatedList;
+
+            CsvReadHelper csvReadHelper = new CsvReadHelper(delimiterCsv);
+            try (Reader reader1 = new InputStreamReader(event.getFile().getInputStream())) {
+                headerRelatedList = csvReadHelper.readHeadersFileRelated(reader1);
+                if (headerRelatedList == null || headerRelatedList.isEmpty()) {
+                    error.append(csvReadHelper.getMessage());
+                    return;
+                }
+            } catch (Exception e) {
+                haveError = true;
+                error.append(System.getProperty("line.separator"));
+                error.append(e.toString());
+                return;
+            }
+
+            try (Reader reader = new InputStreamReader(event.getFile().getInputStream())) {
+
+                if (!csvReadHelper.readFileRelated(reader, headerRelatedList)) {
+                    error.append(csvReadHelper.getMessage());
+                }
+
+                warning = csvReadHelper.getMessage();
+                nodeIdValues = csvReadHelper.getNodeIdValues();
+                if (nodeIdValues != null) {
+                    if (nodeIdValues.isEmpty()) {
+                        haveError = true;
+                        error.append(csvReadHelper.getMessage());
+                        error.append(System.getProperty("line.separator"));
+                        error.append("La lecture a échouée, vérifiez peut être le séparateur des colonnes !!");
+                        warning = "";
+                    } else {
+                        total = nodeIdValues.size();
                         uri = "";//csvReadHelper.getUri();
                         loadDone = true;
                         BDDinsertEnable = true;
@@ -1916,25 +1967,25 @@ public class ImportFileBean implements Serializable {
         }
         initError();
         loadDone = false;
-        String[] multipleIds1;
-        String multipleIds2;
+
+        // 1. Collecte tous les idConcept uniques
+        Set<String> allConceptIds = nodeIdValues.stream()
+                .filter(n -> n.getId() != null && !n.getId().isEmpty())
+                .flatMap(n -> Arrays.stream(n.getId().split("##")))
+                .collect(Collectors.toSet());
+
+        // 2. Récupérer tous les idArk en une seule requête
+        Map<String, String> conceptIdToArkMap = conceptService.getArkIdsFromIdConcepts(allConceptIds, selectedTheso.getCurrentIdTheso());
+
+        // 3. Remplir les valeurs dans nodeIdValues
         for (NodeIdValue nodeIdValue : nodeIdValues) {
-            multipleIds2= "";
-            if (nodeIdValue == null) {
-                continue;
-            }
-            if (nodeIdValue.getId() == null || nodeIdValue.getId().isEmpty()) {
-                continue;
-            }
-            multipleIds1 = nodeIdValue.getId().split("##");
-            for (String multipleId : multipleIds1) {
-                var concept = conceptService.getConcept(multipleId, selectedTheso.getCurrentIdTheso());
-                if(StringUtils.isEmpty(multipleIds2)){
-                    multipleIds2 = concept.getIdArk();
-                } else
-                    multipleIds2 = multipleIds2 + "##" + concept.getIdArk();;
-            }
-            nodeIdValue.setValue(multipleIds2);
+            if (nodeIdValue.getId() == null || nodeIdValue.getId().isEmpty()) continue;
+
+            String value = Arrays.stream(nodeIdValue.getId().split("##"))
+                    .map(id -> conceptIdToArkMap.getOrDefault(id, "")) // garde position si absent
+                    .collect(Collectors.joining("##")); // abc123##def456 -> ark1##ark2
+
+            nodeIdValue.setValue(value);
         }
         loadDone = false;
 
@@ -1967,27 +2018,38 @@ public class ImportFileBean implements Serializable {
         }
         initError();
         loadDone = false;
-        String[] multipleIds1;
-        String multipleIds2;
+
+        // 1. Récupérer tous les identifiants uniques à rechercher
+        Set<String> allArkIds = new HashSet<>();
         for (NodeIdValue nodeIdValue : nodeIdValues) {
-            multipleIds2= "";
-            if (nodeIdValue == null) {
+            if (nodeIdValue == null || nodeIdValue.getId() == null || nodeIdValue.getId().isEmpty()) {
                 continue;
             }
-            if (nodeIdValue.getId() == null || nodeIdValue.getId().isEmpty()) {
+            String[] multipleIds = nodeIdValue.getId().split("##");
+            allArkIds.addAll(Arrays.asList(multipleIds));
+        }
+
+        // 2. Faire un seul appel BDD pour récupérer tous les idConcept correspondants
+        // La méthode getIdConceptsFromArkIds prend un Set d'ArkIds et retourne Map<ArkId, IdConcept>
+        Map<String, String> arkIdToConceptIdMap =
+                conceptService.getIdConceptsFromArkIds(allArkIds, selectedTheso.getCurrentIdTheso());
+
+        // 3. Remplir les valeurs dans nodeIdValues
+        for (NodeIdValue nodeIdValue : nodeIdValues) {
+            if (nodeIdValue == null || nodeIdValue.getId() == null || nodeIdValue.getId().isEmpty()) {
                 continue;
             }
-            multipleIds1 = nodeIdValue.getId().split("##");
-            for (String multipleId : multipleIds1) {
-                if(StringUtils.isEmpty(multipleIds2)){
-                    multipleIds2 = conceptService.getIdConceptFromArkId(multipleId, selectedTheso.getCurrentIdTheso());
-                } else
-                    multipleIds2 = multipleIds2 + "##" + conceptService.getIdConceptFromArkId(multipleId, selectedTheso.getCurrentIdTheso());;
-            }
-            nodeIdValue.setValue(multipleIds2);
+
+            String[] multipleIds = nodeIdValue.getId().split("##");
+
+            // Remplacer chaque ArkId par l'idConcept correspondant
+            String value = Arrays.stream(multipleIds)
+                    .map(id -> arkIdToConceptIdMap.getOrDefault(id, "")) // garde position si absent
+                    .collect(Collectors.joining("##")); // on rejoint avec ## comme séparateur
+
+            nodeIdValue.setValue(value); // abcde##cdert -> 200##300
         }
         loadDone = false;
-
         CsvWriteHelper csvWriteHelper = new CsvWriteHelper();
         byte[] datas = csvWriteHelper.writeCsvResultProcess(nodeIdValues, "identifier", "conceptId");
 
@@ -2532,6 +2594,119 @@ public class ImportFileBean implements Serializable {
         } finally {
             showError();
         }
+    }
+
+    /**
+     * permet d'ajouter une liste d'alignements en CSV au thésaurus
+     *
+     */
+    public void addRelatedList() {
+        if (selectedTheso.getCurrentIdTheso() == null || selectedTheso.getCurrentIdTheso().isEmpty()) {
+            warning = "pas de thésaurus sélectionné";
+            return;
+        }
+        if (nodeIdValues == null || nodeIdValues.isEmpty()) {
+            warning = "pas de valeurs";
+            return;
+        }
+        if (importInProgress) {
+            return;
+        }
+        PrimeFaces.current().executeScript("PF('waitDialog').show();");
+        initError();
+        loadDone = false;
+        progressStep = 0;
+        progress = 0;
+        total = 0;
+        String idConcept = null;
+        List<HierarchicalRelationship> relationsToSave = new ArrayList<>();
+        int total = 0;
+
+        try {
+            // Extraire tous les IDs depuis nodeIdValues
+            List<String> allIds = nodeIdValues.stream()
+                    .map(NodeIdValue::getId)
+                    .filter(id -> id != null && !id.isBlank())
+                    .collect(Collectors.toList());
+
+            // Définir la taille du batch pour la requête SQL
+            int batchSize = 5000;
+            Set<String> existingIds = new HashSet<>();
+
+            // Vérifier en batches lesquels existent dans la base
+            for (int i = 0; i < allIds.size(); i += batchSize) {
+                List<String> batch = allIds.subList(i, Math.min(i + batchSize, allIds.size()));
+                existingIds.addAll(conceptRepository.findExistingIds(new HashSet<>(batch), selectedTheso.getCurrentIdTheso()));
+            }
+
+            // Traiter chaque NodeIdValue
+            for (NodeIdValue nodeIdValue : nodeIdValues) {
+                if (nodeIdValue == null || nodeIdValue.getId() == null || nodeIdValue.getId().isBlank()) {
+                    continue;
+                }
+
+                String nodeId = nodeIdValue.getId();
+
+                // Si l'id n'existe pas en base, on ignore
+                if (!existingIds.contains(nodeId)) {
+                    continue;
+                }
+
+/*                idConcept = null;
+                switch (selectedIdentifierImportAlign.toLowerCase()) {
+                    case "ark":
+                        idConcept = conceptService.getIdConceptFromArkId(nodeId, selectedTheso.getCurrentIdTheso());
+                        break;
+                    case "handle":
+                        idConcept = conceptService.getIdConceptFromHandleId(nodeId);
+                        break;
+                    case "identifier":
+                        idConcept = nodeId;
+                        break;
+                }
+*/
+                if (StringUtils.isBlank(nodeId)) {
+                    continue;
+                }
+
+                // Ajouter relation RT dans les deux sens
+                relationsToSave.add(HierarchicalRelationship.builder()
+                        .idConcept1(nodeId)
+                        .idConcept2(nodeIdValue.getValue())
+                        .idThesaurus(selectedTheso.getCurrentIdTheso())
+                        .role("RT")
+                        .build());
+
+                relationsToSave.add(HierarchicalRelationship.builder()
+                        .idConcept1(nodeIdValue.getValue())
+                        .idConcept2(nodeId)
+                        .idThesaurus(selectedTheso.getCurrentIdTheso())
+                        .role("RT")
+                        .build());
+
+                total++;
+            }
+
+            // Insert en lot → énorme gain de performance
+            if (!relationsToSave.isEmpty()) {
+                hierarchicalRelationshipRepository.saveAll(relationsToSave);
+            }
+
+            PrimeFaces.current().executeScript("PF('waitDialog').hide();");
+            loadDone = false;
+            importDone = true;
+            BDDinsertEnable = false;
+            importInProgress = false;
+            uri = null;
+            info = "import réussi, alignements importés = " + (int) total;
+            total = 0;
+        } catch (Exception e) {
+            error.append(System.getProperty("line.separator"));
+            error.append(e.toString());
+        } finally {
+            showError();
+        }
+        PrimeFaces.current().executeScript("PF('waitDialog').hide();");
     }
 
     /**

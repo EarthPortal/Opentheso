@@ -78,12 +78,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -225,12 +220,8 @@ public class ConceptService {
     public void setConceptType(String idThesaurus, String idConcept, String type) {
 
         log.debug("Mise à jour du type de concept {} pour le concept id {}", type, idConcept);
-        var concept = getConcept(idConcept, idThesaurus);
-        if (concept == null) {
-            return;
-        }
-        concept.setConceptType(type);
-        conceptRepository.save(concept);
+        conceptRepository.setConceptType(type, new Date(), idConcept, idThesaurus);
+        log.debug("Mise à jour du type de concept {} est terminée pour le concept id {}", type, idConcept);
     }
 
     public void setTopConceptTag(boolean status, String idConcept, String idThesaurus) {
@@ -239,6 +230,7 @@ public class ConceptService {
         conceptRepository.setTopConceptTag(status, idConcept, idThesaurus);
     }
 
+    @Transactional
     public void deleteByThesaurus(String idThesaurus) {
 
         log.debug("Suppression de tous les concepts présents dans le thésaurus id {}", idThesaurus);
@@ -261,7 +253,7 @@ public class ConceptService {
 
             conceptRepository.deleteAllByIdThesaurus(idThesaurus);
         } catch (Exception ex) {
-            log.debug("Aucun concept n'est présent dans le thésaurus");
+            log.error(ex.getMessage());
         }
     }
 
@@ -1432,5 +1424,37 @@ public class ConceptService {
             relation.setUri(uri);
             return relation;
         }).toList();
+    }
+
+    public Map<String, String> getIdConceptsFromArkIds(Set<String> arkIds, String idTheso) {
+        if (arkIds == null || arkIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Object[]> list = conceptRepository.findArkIds(arkIds, idTheso);
+
+        Map<String, String> result = new HashMap<>();
+        for (Object[] row : list) {
+            String arkId = (String) row[0];
+            String idConcept = (String) row[1];
+            result.put(arkId, idConcept);
+        }
+
+        return result;
+    }
+
+    public Map<String, String> getArkIdsFromIdConcepts(Set<String> idConcepts, String idTheso) {
+        if (idConcepts == null || idConcepts.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Object[]> list = conceptRepository.findArkFromIdConcepts(idConcepts, idTheso);
+        Map<String, String> result = new HashMap<>();
+        for (Object[] row : list) {
+            String idConcept = (String) row[0];
+            String idArk = (String) row[1];
+            result.put(idConcept, idArk);
+        }
+        return result;
     }
 }

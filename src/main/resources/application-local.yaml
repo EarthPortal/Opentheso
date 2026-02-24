@@ -8,6 +8,8 @@ server:
   servlet:
     context-path: /
     session:
+      cookie:
+        name: ${random.value}
       timeout: 30m
   error:
     path: /errorPages/error500.xhtml
@@ -46,6 +48,7 @@ spring:
       max-request-size: 100MB  # Taille totale max de la requête
   datasource:
     url: jdbc:postgresql://localhost:5433/opentheso
+
     password: opentheso
     username: opentheso
   jpa:
@@ -59,11 +62,21 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/changelog/db.changelog.xml
+
   graphql:
     graphiql:
       enabled: true
       path: /graphiql
       endpoint: /graphql
+
+  mail:
+    host: ${smpt.hostname}
+    port: ${smpt.portNumber}
+    protocol: ${smpt.protocol}
+    properties:
+      mail.smtp.auth: ${smpt.authorization}
+      mail.smtp.starttls.enable: false
+    default-encoding: UTF-8
 
   # Connexion de KeyCloak
 #  security:
@@ -96,12 +109,11 @@ certificats:
   key: /Users/miledrousset/NetBeansProjects22/Opentheso/src/main/resources/certificats/key.p12
 
 smpt:
-  protocol: smtp
+  mailFrom: opentheso@mom.fr
   hostname: smtprelay.cnrs.fr
   portNumber: 25
+  protocol: smtp
   authorization: false
-  mailFrom: opentheso@mom.fr
-  transportMail: smtp
 
 neo4j:
   serverName: localhost
@@ -110,19 +122,5 @@ neo4j:
   user: neo4j
   password: neo4j1234
 
-ldap:
-  security:
-    authentication: simple
-  server:
-    url: ldapr3.mondomaine.fr
-  initial:
-    context:
-      factory: com.sun.jndi.ldap.LdapCtxFactory
-  key:
-    store:
-      password: changeit
-      path: /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts
-    trust:
-      password: changeit
-      path: /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts
+
 

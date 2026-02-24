@@ -372,25 +372,34 @@ public class RelationService {
     }
 
     @Transactional
-    public void addRelationRT(String idConcept1, String idThesaurus, String idConcept2, int idUser) {
+    public boolean addRelationRT(String idConcept1, String idThesaurus, String idConcept2, int idUser) {
+        try {
+            log.debug("Ajouter une relation associative entre les deux concepts {} et {}", idConcept1, idConcept2);
+            addRelationHistorique(idConcept1, idThesaurus, idConcept2, "RT", idUser, "ADD");
+            hierarchicalRelationshipRepository.save(
+                    HierarchicalRelationship.builder()
+                            .idConcept1(idConcept1)
+                            .idConcept2(idConcept2)
+                            .idThesaurus(idThesaurus)
+                            .role("RT")
+                            .build()
+            );
+            hierarchicalRelationshipRepository.save(
+                    HierarchicalRelationship.builder()
+                            .idConcept1(idConcept2)
+                            .idConcept2(idConcept1)
+                            .idThesaurus(idThesaurus)
+                            .role("RT")
+                            .build()
+            );
 
-        log.debug("Ajouter une relation associative entre les deux concepts {} et {}", idConcept1, idConcept2);
-        addRelationHistorique(idConcept1, idThesaurus, idConcept2, "RT", idUser, "ADD");
-
-        hierarchicalRelationshipRepository.save(HierarchicalRelationship.builder()
-                .idConcept1(idConcept1)
-                .idConcept2(idConcept2)
-                .idThesaurus(idThesaurus)
-                .role("RT")
-                .build());
-
-        hierarchicalRelationshipRepository.save(HierarchicalRelationship.builder()
-                .idConcept1(idConcept2)
-                .idConcept2(idConcept1)
-                .idThesaurus(idThesaurus)
-                .role("RT")
-                .build());
+            return true;
+        } catch (Exception e) {
+            log.error("Erreur lors de l'ajout de la relation RT", e);
+            return false;
+        }
     }
+
 
     @Transactional
     public void deleteCustomRelationship(String idConcept1, String idThesaurus, String idConcept2, int idUser,

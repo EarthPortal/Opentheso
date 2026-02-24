@@ -213,5 +213,5 @@
     <changeSet id="26.01.4" author="Miled">
         <sqlFile path="v26.01/26-01_04.sql" relativeToChangelogFile="true" splitStatements="false"/>
     </changeSet>
-
+    <include file="/changelog/v26.02/26_02_01.xml"/>
 </databaseChangeLog>

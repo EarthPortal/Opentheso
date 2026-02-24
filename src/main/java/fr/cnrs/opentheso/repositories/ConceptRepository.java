@@ -20,9 +20,28 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 public interface ConceptRepository extends JpaRepository<Concept, Integer> {
+
+    @Query("SELECT c.idArk, c.idConcept " +
+            "FROM Concept c " +
+            "WHERE c.idArk IN :arkIds AND c.idThesaurus = :idTheso")
+    List<Object[]> findArkIds(@Param("arkIds") Set<String> arkIds,
+                              @Param("idTheso") String idTheso);
+
+    @Query("SELECT c.idConcept, c.idArk " +
+            "FROM Concept c " +
+            "WHERE c.idConcept IN :idConcepts AND c.idThesaurus = :idTheso")
+    List<Object[]> findArkFromIdConcepts(@Param("idConcepts") Set<String> idConcepts,
+                                         @Param("idTheso") String idTheso);
+
+    // Optionnel : récupérer en batch pour éviter des milliers d'appels
+    @Query("SELECT c.idConcept FROM Concept c WHERE c.idThesaurus = :idThesaurus AND c.idConcept IN :ids")
+    List<String> findExistingIds(@Param("ids") Set<String> ids, @Param("idThesaurus") String idThesaurus);
+
+
 
     List<Concept> findByIdConcept(String idConcept);
 
@@ -57,6 +76,11 @@ public interface ConceptRepository extends JpaRepository<Concept, Integer> {
     @Query("UPDATE Concept c SET c.idArk = :idArk, c.modified = :now WHERE c.idConcept = :idConcept AND c.idThesaurus = :idThesaurus")
     void setIdArk(@Param("idArk") String idArk, @Param("now") Date now, @Param("idConcept") String idConcept, @Param("idThesaurus") String idThesaurus);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Concept c SET c.conceptType = :type, c.modified = :now WHERE c.idConcept = :idConcept AND c.idThesaurus = :idThesaurus")
+    void setConceptType(@Param("type") String type, @Param("now") Date now, @Param("idConcept") String idConcept, @Param("idThesaurus") String idThesaurus);
+
 
     @Modifying
     @Transactional
@@ -85,9 +109,13 @@ public interface ConceptRepository extends JpaRepository<Concept, Integer> {
     @Query("UPDATE Concept c SET c.notation = :notation WHERE c.idConcept = :idConcept and c.idThesaurus = :idThesaurus")
     int updateNotation(String idConcept, String idThesaurus, String notation);
 
-    @Modifying
+  /*  @Modifying
     @Transactional
     void deleteAllByIdThesaurus(String thesaurus);
+*/
+    @Modifying
+    @Query("DELETE FROM Concept c WHERE c.idThesaurus = :idThesaurus")
+    void deleteAllByIdThesaurus(@Param("idThesaurus") String idThesaurus);
 
     @Modifying
     @Transactional
