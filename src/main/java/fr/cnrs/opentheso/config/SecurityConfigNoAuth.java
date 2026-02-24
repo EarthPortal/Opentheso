@@ -26,8 +26,4 @@ public class SecurityConfigNoAuth {
                 .build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12); // 12 = facteur de force
-    }
 }

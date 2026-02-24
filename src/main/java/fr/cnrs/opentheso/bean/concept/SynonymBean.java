@@ -119,6 +119,10 @@ public class SynonymBean implements Serializable {
 
         refreshConceptDatas(idUser);
 
+        conceptBean.getConcept(selectedTheso.getCurrentIdTheso(),
+                conceptBean.getNodeConcept().getConcept().getIdConcept(),
+                selectedTheso.getCurrentLang(), currentUser);
+
         MessageUtils.showInformationMessage("Synonyme ajouté avec succès");
 
         init();
@@ -178,6 +182,9 @@ public class SynonymBean implements Serializable {
         }
 
         refreshConceptDatas(idUser);
+        conceptBean.getConcept(selectedTheso.getCurrentIdTheso(),
+                conceptBean.getNodeConcept().getConcept().getIdConcept(),
+                selectedTheso.getCurrentLang(), currentUser);
 
         MessageUtils.showInformationMessage("Synonyme modifié avec succès");
         PrimeFaces.current().ajax().update("containerIndex:formRightTab");
@@ -289,6 +296,9 @@ public class SynonymBean implements Serializable {
             updateSynonym(nodeEM1, idUser, true);
         }
 
+        conceptBean.getConcept(selectedTheso.getCurrentIdTheso(),
+                conceptBean.getNodeConcept().getConcept().getIdConcept(),
+                selectedTheso.getCurrentLang(), currentUser);
         reset();
         prepareNodeEMForEdit();
         PrimeFaces.current().executeScript("PF('renameSynonym').hide();");

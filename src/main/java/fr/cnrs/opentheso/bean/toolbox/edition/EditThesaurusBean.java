@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
+import org.springframework.data.domain.Sort;
 
 
 @Getter
@@ -105,7 +106,7 @@ public class EditThesaurusBean implements Serializable {
             }
         }
         preferredLang = nodePreference.getSourceLang();
-        allLangs = languageRepository.findAll();
+        allLangs = languageRepository.findAll(Sort.by(Sort.Direction.ASC, "iso6391"));
         languagesOfThesaurus = thesaurusService.getAllUsedLanguagesOfThesaurusNode(nodeIdValueOfThesaurus.getId(), preferredLang);
         selectedLang = null;
         langSelected = new NodeLangTheso();

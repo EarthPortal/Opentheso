@@ -6,7 +6,6 @@ import fr.cnrs.opentheso.bean.menu.theso.RoleOnThesaurusBean;
 import fr.cnrs.opentheso.bean.menu.theso.SelectedTheso;
 import fr.cnrs.opentheso.bean.menu.users.CurrentUser;
 import fr.cnrs.opentheso.bean.rightbody.viewconcept.ConceptView;
-import fr.cnrs.opentheso.bean.setting.PreferenceBean;
 import fr.cnrs.opentheso.entites.*;
 import fr.cnrs.opentheso.models.concept.Concept;
 import fr.cnrs.opentheso.models.concept.DCMIResource;
@@ -15,6 +14,7 @@ import fr.cnrs.opentheso.models.nodes.DcElement;
 import fr.cnrs.opentheso.models.nodes.NodeIdValue;
 import fr.cnrs.opentheso.models.terms.Term;
 import fr.cnrs.opentheso.repositories.*;
+import fr.cnrs.opentheso.services.security.CryptoService;
 import fr.cnrs.opentheso.utils.MessageUtils;
 import fr.cnrs.opentheso.utils.ToolsHelper;
 import fr.cnrs.opentheso.ws.ark.ArkHelper2;
@@ -57,6 +57,7 @@ public class ConceptAddService {
     private final FacetService facetService;
     private final ThesaurusDcTermRepository thesaurusDcTermRepository;
     private final CurrentUser currentUser;
+    private final CryptoService cryptoService;
 
 
     public boolean addNewConcept(String idThesaurus, String idNewConcept, String idGroup, String idLang, String prefLabel,
@@ -224,7 +225,16 @@ public class ConceptAddService {
             // création de l'identifiant Handle
             if (preferences.isUseHandle()) {
                 if (!handleConceptService.addIdHandle(idConcept, concept.getIdThesaurus())) {
-                    MessageUtils.showErrorMessage("La création du Ark local a échoué");
+                    MessageUtils.showErrorMessage("La création de Handle a échoué");
+                }
+            }
+            if (preferences.isUseOpenArk()) {
+                ArrayList<String> idConcepts = new ArrayList<>();
+                idConcepts.add(idConcept);
+                String apiKeyOpenArk = cryptoService.decrypt(preferences.getApiKeyOpenArk());
+                if(generateOpenArkId(concept.getIdThesaurus(), idConcepts,
+                        selectedTheso.getCurrentLang(), preferences, apiKeyOpenArk) == null){
+                    MessageUtils.showErrorMessage("La création du Ark a échoué");
                 }
             }
 
@@ -241,7 +251,7 @@ public class ConceptAddService {
                 ArrayList<String> idConcepts = new ArrayList<>();
                 idConcepts.add(idConcept);
                 if (!arkService.generateArkIdLocal(concept.getIdThesaurus(), idConcepts)) {
-                    MessageUtils.showErrorMessage("La création du Ark local a échouée");
+                    MessageUtils.showErrorMessage("La création du Ark a échouée");
                     log.error("La création du Ark local a échouée");
                 }
             }
@@ -296,22 +306,23 @@ public class ConceptAddService {
 
     private void createAndSaveDcTerm(String idThesaurus, String name, String value, String language, String type) {
         DcElement dcElement = new DcElement(name, value, language, type);
-        try {
-            ThesaurusDcTerm tmp = thesaurusDcTermRepository.save(
-                    ThesaurusDcTerm.builder()
-                            .idThesaurus(idThesaurus)
-                            .name(dcElement.getName())
-                            .value(dcElement.getValue())
-                            .language(dcElement.getLanguage())
-                            .dataType(dcElement.getType())
-                            .build()
-            );
-            dcElement.setId(tmp.getId().intValue());
-        } catch (DataIntegrityViolationException e) {
 
-            log.debug("DC Term déjà existant, insertion ignorée : {} {} {}",
-                    idThesaurus, name, value);
+        boolean exists = thesaurusDcTermRepository.existsByIdThesaurusAndNameAndValue(idThesaurus, name, value);
+        if (exists) {
+            log.debug("DC Term déjà existant, insertion ignorée : {} {} {}", idThesaurus, name, value);
+            return;
         }
+
+        ThesaurusDcTerm tmp = thesaurusDcTermRepository.save(
+                ThesaurusDcTerm.builder()
+                        .idThesaurus(idThesaurus)
+                        .name(dcElement.getName())
+                        .value(dcElement.getValue())
+                        .language(dcElement.getLanguage())
+                        .dataType(dcElement.getType())
+                        .build()
+        );
+        dcElement.setId(tmp.getId().intValue());
     }
 
 

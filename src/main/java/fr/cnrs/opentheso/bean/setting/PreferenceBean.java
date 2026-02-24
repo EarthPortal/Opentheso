@@ -7,10 +7,10 @@ import fr.cnrs.opentheso.models.thesaurus.NodeLangTheso;
 import fr.cnrs.opentheso.services.HomePageService;
 import fr.cnrs.opentheso.services.PreferenceService;
 import fr.cnrs.opentheso.services.ThesaurusService;
+import fr.cnrs.opentheso.services.security.CryptoService;
 import fr.cnrs.opentheso.utils.MessageUtils;
 
-import fr.cnrs.opentheso.utils.SimpleCrypto;
-import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import java.io.Serializable;
@@ -20,8 +20,6 @@ import jakarta.enterprise.context.SessionScoped;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-
 
 @Slf4j
 @Getter
@@ -36,6 +34,7 @@ public class PreferenceBean implements Serializable {
     private final HomePageService homePageService;
     private final ThesaurusService thesaurusService;
     private final RoleOnThesaurusBean roleOnThesaurus;
+    private final CryptoService cryptoService;
 
     private String uriType;
     private Preferences preferences;
@@ -53,15 +52,25 @@ public class PreferenceBean implements Serializable {
     private String newDeeplApiKey;
     private String actualDeeplApiKey;
 
-    private SimpleCrypto cryptoService;
 
-    @Value("${crypto.openark.key}")
-    private String secretKey;
 
-    @PostConstruct
-    public void initCrypto() {
-        cryptoService = new SimpleCrypto(secretKey);
-    }
+/*
+    @Inject
+    public PreferenceBean(
+            SelectedTheso selectedTheso,
+            PreferenceService preferenceService,
+            HomePageService homePageService,
+            ThesaurusService thesaurusService,
+            RoleOnThesaurusBean roleOnThesaurus,
+            CryptoService cryptoService
+    ) {
+        this.selectedTheso = selectedTheso;
+        this.preferenceService = preferenceService;
+        this.homePageService = homePageService;
+        this.thesaurusService = thesaurusService;
+        this.roleOnThesaurus = roleOnThesaurus;
+        this.cryptoService = cryptoService;
+    }*/
 
     public void init() {
 
@@ -186,12 +195,4 @@ public class PreferenceBean implements Serializable {
         newDeeplApiKey = null;
         init();
     }
-
-
-    // Pour utiliser la clé d'API ailleurs
-    public String getDecryptedApiKey(String apiKey) {
-        if (StringUtils.isBlank(apiKey)) return null;
-        return cryptoService.decrypt(apiKey);
-    }
-
 }

@@ -12,9 +12,7 @@ import fr.cnrs.opentheso.models.notes.NodeNote;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 import fr.cnrs.opentheso.models.skosapi.SKOSProperty;
@@ -203,30 +201,42 @@ public class CsvReadHelper {
     public boolean readFileIdentifier(Reader in) {
         try {
             CSVFormat cSVFormat = CSVFormat.DEFAULT.builder().setHeader()
-                    .setIgnoreEmptyLines(true).setIgnoreHeaderCase(true).setTrim(true).build();
+                    .setIgnoreEmptyLines(true)
+                    .setIgnoreHeaderCase(true)
+                    .setTrim(true)
+                    .build();
+
             CSVParser cSVParser = cSVFormat.parse(in);
-            String value;
             nodeIdValues = new ArrayList<>();
+            Set<String> uniqueIds = new HashSet<>(); // pour éviter les doublons sur l'id
+
             for (CSVRecord record : cSVParser) {
-                NodeIdValue nodeIdValue = new NodeIdValue();
-                // setId, si l'identifiant n'est pas renseigné, on récupère un NULL
+                String id;
                 try {
-                    value = record.get("identifier");
-                    if (value == null) {
+                    id = record.get("identifier");
+                    if (id == null || id.isEmpty()) {
                         continue;
                     }
-                    nodeIdValue.setId(value);
                 } catch (Exception e) {
                     continue;
                 }
-                nodeIdValues.add(nodeIdValue);
+
+                // Vérification doublon
+                if (!uniqueIds.contains(id)) {
+                    NodeIdValue nodeIdValue = new NodeIdValue();
+                    nodeIdValue.setId(id);
+                    nodeIdValues.add(nodeIdValue);
+                    uniqueIds.add(id); // marque comme déjà ajouté
+                }
             }
             return true;
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(CsvReadHelper.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CsvReadHelper.class.getName())
+                    .log(Level.SEVERE, null, ex);
         }
         return false;
     }
+
 
     /**
      * permet de lire un fichier CSV complet pour importer les alignements
@@ -594,6 +604,85 @@ public class CsvReadHelper {
         }
         return null;        
     }
+
+    public ArrayList<String > readHeadersFileRelated (Reader in){
+        try {
+            CSVFormat cSVFormat = CSVFormat.DEFAULT.builder().setHeader().setDelimiter(delimiter)
+                    .setIgnoreEmptyLines(true).setIgnoreHeaderCase(true).setTrim(true).build();
+            CSVParser cSVParser = cSVFormat.parse(in);
+            Map<String, Integer> headers = cSVParser.getHeaderMap();
+
+            ArrayList<String> headersRelated = new ArrayList<>();
+            for (String columnName : headers.keySet()) {
+                headersRelated.add(columnName);
+            }
+            return headersRelated;
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(CsvReadHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    /**
+     * permet de lire un fichier CSV complet pour importer les RT
+     *
+     * @param in
+     * @param headerSourceAlign
+     * @return
+     */
+    public boolean readFileRelated(Reader in, ArrayList<String> headerSourceAlign) {
+        try {
+            CSVFormat format = CSVFormat.DEFAULT.builder()
+                    .setHeader()
+                    .setDelimiter(delimiter)
+                    .setIgnoreEmptyLines(true)
+                    .setIgnoreHeaderCase(true)
+                    .setTrim(true)
+                    .build();
+
+            CSVParser parser = format.parse(in);
+
+            // id -> valeurs related uniques
+            Map<String, Set<String>> relatedById = new HashMap<>();
+
+            for (CSVRecord record : parser) {
+
+                String id;
+                String related;
+
+                try {
+                    id = record.get("localid");
+                    related = record.get("skos:related");
+                } catch (Exception e) {
+                    continue;
+                }
+
+                if (StringUtils.isBlank(id) || StringUtils.isBlank(related)) {
+                    continue;
+                }
+
+                relatedById
+                        .computeIfAbsent(id, k -> new HashSet<>())
+                        .add(related);
+            }
+
+            // Si tu as besoin d'une structure finale plate (id, value)
+            nodeIdValues = new ArrayList<>();
+            relatedById.forEach((id, values) ->
+                    values.forEach(value ->
+                            nodeIdValues.add(new NodeIdValue(id, value))
+                    )
+            );
+
+            return true;
+
+        } catch (IOException ex) {
+            log.error(ex.getMessage());
+        }
+        return false;
+    }
+
+
     /**
      * permet de lire un fichier CSV complet pour importer les alignements
      *

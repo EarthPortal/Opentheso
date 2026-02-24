@@ -30,6 +30,7 @@ import fr.cnrs.opentheso.services.RelationService;
 import fr.cnrs.opentheso.services.SearchService;
 import fr.cnrs.opentheso.services.TermService;
 import fr.cnrs.opentheso.services.exports.csv.CsvWriteHelper;
+import fr.cnrs.opentheso.services.security.CryptoService;
 import fr.cnrs.opentheso.utils.MessageUtils;
 import fr.cnrs.opentheso.services.HandleService;
 
@@ -86,6 +87,7 @@ public class EditConcept implements Serializable {
     private final ConceptTypeService conceptTypeService;
     private final SearchService searchService;
     private final SelectedTheso selectedThesaurus;
+    private final CryptoService cryptoService;
 
     private final PreferenceBean preferenceBean;
 
@@ -109,7 +111,7 @@ public class EditConcept implements Serializable {
         selectedConceptType = null;
         nodeIdValues = null;
         nodeConceptTypeToDelete = null;
-        nodeConceptTypeToAdd = null;
+        nodeConceptTypeToAdd = new NodeConceptType();
     }
 
     public void reset(String label) {
@@ -122,7 +124,7 @@ public class EditConcept implements Serializable {
         inProgress = false;
         nodeIdValues = null;
         nodeConceptTypeToDelete = null;
-        nodeConceptTypeToAdd = null;
+        nodeConceptTypeToAdd = new NodeConceptType();
 
         nodeReplaceBy = conceptView.getNodeConcept().getReplacedBy();
     }
@@ -134,7 +136,7 @@ public class EditConcept implements Serializable {
         applyToBranch = false;
         reciprocalRelationship = false;
         nodeConceptTypeToDelete = null;
-        nodeConceptTypeToAdd = null;
+        nodeConceptTypeToAdd = new NodeConceptType();
     }
 
     public void removeAllConceptFromCollection(String idGroup){
@@ -562,7 +564,7 @@ public class EditConcept implements Serializable {
         if(roleOnThesaurusBean.getNodePreference() == null) return;
         idConcepts.add(conceptView.getNodeConcept().getConcept().getIdConcept());
         if(roleOnThesaurusBean.getNodePreference().isUseOpenArk()) {
-            String apiKeyOpenArk = preferenceBean.getDecryptedApiKey(roleOnThesaurusBean.getNodePreference().getApiKeyOpenArk());
+            String apiKeyOpenArk = cryptoService.decrypt(roleOnThesaurusBean.getNodePreference().getApiKeyOpenArk());
             generateOpenArkIds(idConcepts, apiKeyOpenArk, roleOnThesaurusBean.getNodePreference());
         } else {
             generateArkIds(idConcepts);
@@ -578,7 +580,7 @@ public class EditConcept implements Serializable {
         if(roleOnThesaurusBean.getNodePreference() == null) return;
         idConcepts.add(conceptView.getNodeConcept().getConcept().getIdConcept());
         if(roleOnThesaurusBean.getNodePreference().isUseOpenArk()) {
-            String apiKeyOpenArk = preferenceBean.getDecryptedApiKey(roleOnThesaurusBean.getNodePreference().getApiKeyOpenArk());
+            String apiKeyOpenArk = cryptoService.decrypt(roleOnThesaurusBean.getNodePreference().getApiKeyOpenArk());
             arkService.deleteArkWithOpenArk(conceptView.getNodeConcept().getConcept().getIdThesaurus(),
                     idConcepts, apiKeyOpenArk, roleOnThesaurusBean.getNodePreference());
         }

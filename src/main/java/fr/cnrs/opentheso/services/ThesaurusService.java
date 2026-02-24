@@ -2,6 +2,7 @@ package fr.cnrs.opentheso.services;
 
 import fr.cnrs.opentheso.entites.LanguageIso639;
 import fr.cnrs.opentheso.entites.Thesaurus;
+import fr.cnrs.opentheso.entites.ThesaurusDcTerm;
 import fr.cnrs.opentheso.entites.ThesaurusLabel;
 import fr.cnrs.opentheso.models.nodes.NodeIdValue;
 import fr.cnrs.opentheso.models.thesaurus.NodeLangTheso;
@@ -71,6 +72,9 @@ public class ThesaurusService {
     private final UserRoleOnlyOnRepository userRoleOnlyOnRepository;
     private final ExternalImageRepository externalImageRepository;
 
+    public List<ThesaurusDcTerm> getDcTermsOfThesaurus(String idThesaurus) {
+        return thesaurusDcTermRepository.findAllByIdThesaurus(idThesaurus);
+    }
 
     public Thesaurus getThesaurusById(String idThesaurus) {
 

@@ -8,6 +8,7 @@ import fr.cnrs.opentheso.repositories.ThesaurusDcTermRepository;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
@@ -52,12 +53,13 @@ public class ThesaurusMetadataAdd implements Serializable{
         var tmp = thesaurusDcTermRepository.findAllByIdThesaurus(idThesaurus);
         if (CollectionUtils.isNotEmpty(tmp)) {
             return tmp.stream().map(element -> DcElement.builder()
-                    .id(element.getId().intValue())
-                    .name(element.getName())
-                    .value(element.getValue())
-                    .language(element.getLanguage())
-                    .type(element.getDataType())
-                    .build()).toList();
+                            .id(element.getId().intValue())
+                            .name(element.getName())
+                            .value(element.getValue())
+                            .language(element.getLanguage())
+                            .type(element.getDataType())
+                            .build())
+                    .collect(Collectors.toCollection(ArrayList::new)); // <- ici
         } else {
             return new ArrayList<>();
         }
