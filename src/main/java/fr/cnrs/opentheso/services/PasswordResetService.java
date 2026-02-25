@@ -32,24 +32,8 @@ public class PasswordResetService {
 
     private static final int TOKEN_EXPIRATION_MINUTES = 30;
 
-
-
     @Autowired
     private HttpServletRequest request;
-
-/*
-    // Récupération du token depuis l'URL
-    @PostConstruct
-    public void init() {
-        // ici, token devrait être injecté automatiquement par f:viewParam
-        if (token != null) {
-            try {
-                passwordResetService.validateToken(token);
-            } catch (Exception e) {
-                message = "Lien invalide ou expiré.";
-            }
-        }
-    }*/
 
     public String getBaseUrl() {
         String scheme = request.getScheme(); // http ou https
@@ -80,7 +64,13 @@ public class PasswordResetService {
             String resetLink = baseUrl + "/reset-password.xhtml?token=" + token;
 
             mailService.sendMail(user.getMail(), "Réinitialisation mot de passe",
-                    "Cliquez sur ce lien pour réinitialiser votre mot de passe (30 min) : " + resetLink);
+                    "Bonjour,<br>" +
+                            "Vous avez fait une demande de réinitialisation de votre mot de passe sur Opentheso.<br>" +
+                            "Pour définir un nouveau mot de passe, cliquez sur le lien suivant : " +
+                            resetLink + "<br>" +
+                            "<br>" +
+                            "Si vous n’êtes pas à l’origine de cette demande, merci d’ignorer ce message.<br>" +
+                            "Celui-ci a été généré automatiquement, merci de ne pas y répondre." );
         });
     }
 
