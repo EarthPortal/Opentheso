@@ -466,6 +466,9 @@ public class UserService {
         User user = userOpt.get();
         String storedHash = user.getPassword();
         boolean matches = false;
+        if(storedHash == null) {
+            return null;
+        }
 
         if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$")) {
             // mot de passe déjà en BCrypt

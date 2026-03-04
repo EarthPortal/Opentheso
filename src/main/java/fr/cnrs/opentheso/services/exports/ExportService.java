@@ -154,7 +154,7 @@ public class ExportService {
             getLabels(p.getAltLab_hiden(), sKOSResource, SKOSProperty.HIDDEN_LABEL);
             getLabels(p.getAltLab(), sKOSResource, SKOSProperty.ALT_LABEL);
 
-            if (StringUtils.isNotEmpty(p.getBroader())) {
+            if (StringUtils.isEmpty(p.getBroader())) {
                 sKOSResource.getRelationsList().add(new SKOSRelation(idThesaurus, getUriThesoFromId(idThesaurus, originalUri, nodePreference),
                         SKOSProperty.TOP_CONCEPT_OF));
             }

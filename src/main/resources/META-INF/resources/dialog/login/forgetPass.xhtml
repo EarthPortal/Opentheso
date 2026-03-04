@@ -13,21 +13,17 @@
               position="top"
               style="margin-top: 50px" >
 
-        <p:spacer height="40px;" />
-
         <h:form id="forgetPassForm">
-            <div class="row">
-                <div class="col-5">
+            <div class="row" style="margin-top: 20px; margin-bottom: 20px;">
+                <div class="col-2" style="text-align: right">
                     <h:outputText value="#{langueBean.getMsg('profile.email')}" />
                 </div>
-                <div class="col-7">
+                <div class="col-10">
                     <p:inputText placeholder="#{langueBean.getMsg('profile.yourEmail')}"
                                  value="#{forgotPasswordBean.sendTo}"
                                  style="width: 100%" />
                 </div>
             </div>
-
-            <p:spacer height="20px;" />
 
             <!-- Message à afficher après envoi du mail -->
             <h:panelGroup rendered="#{not empty forgotPasswordBean.message}">
