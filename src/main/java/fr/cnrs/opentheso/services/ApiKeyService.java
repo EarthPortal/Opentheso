@@ -1,14 +1,18 @@
 package fr.cnrs.opentheso.services;
 
+import fr.cnrs.opentheso.entites.User;
 import fr.cnrs.opentheso.repositories.UserRepository;
 import fr.cnrs.opentheso.utils.MD5Password;
+import fr.cnrs.opentheso.utils.SimpleCrypto;
 import fr.cnrs.opentheso.utils.ToolsHelper;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 import fr.cnrs.opentheso.ws.openapi.helper.ApiKeyState;
 import jakarta.ws.rs.core.Response;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,10 +22,50 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-@AllArgsConstructor
 public class ApiKeyService {
 
     private final UserRepository userRepository;
+    private final SimpleCrypto simpleCrypto;
+
+    public ApiKeyService(
+            UserRepository userRepository,
+            @Value("${crypto.key}") String cryptoKey
+    ) {
+        this.userRepository = userRepository;
+        this.simpleCrypto = new SimpleCrypto(cryptoKey); // AES-GCM crypto
+    }
+
+    /**
+     * Retourne l'utilisateur associé à la clé API ou Optional.empty() si invalide
+     */
+    public Optional<User> findUserByApiKey(String apiKeyHeader) {
+        if (apiKeyHeader == null || apiKeyHeader.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<Object[]> users = userRepository.findAllUserIdAndApiKey();
+
+        for (Object[] row : users) {
+            Integer userId = (Integer) row[0];
+            String encryptedKey = (String) row[1];
+
+            try {
+                String decryptedKey = simpleCrypto.decrypt(encryptedKey);
+                if (apiKeyHeader.equals(decryptedKey)) {
+                    User user = new User();
+                    user.setId(userId);
+                    user.setApiKey(encryptedKey);
+                    return Optional.of(user);
+                }
+            } catch (Exception e) {
+                // Ignorer les clés malformées
+            }
+        }
+
+        return Optional.empty();
+    }
+
+
 
     /**
      * Génère une clé API d'une longueur choisie avec le header voulu

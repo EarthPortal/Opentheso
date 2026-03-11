@@ -2,6 +2,7 @@ package fr.cnrs.opentheso.bean.importexport.newcsvimport;
 
 import fr.cnrs.opentheso.models.skos.SkosConceptDto;
 import fr.cnrs.opentheso.services.imports.csv.newcodes.CsvImportService;
+import fr.cnrs.opentheso.services.mappers.SkosConceptMapper;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 import lombok.Getter;
@@ -25,12 +26,16 @@ public class SkosConceptImportBean implements Serializable {
     @Autowired
     private CsvImportService csvImportService;
 
+    @Autowired
+    private SkosConceptMapper skosConceptMapper; // <-- assembler centralisé
+
     private UploadedFile file;
     private List<SkosConceptDto> importedConcepts = new ArrayList<>();
     private String message;
 
     /**
-     * Gestion du fichier CSV uploadé
+     * Gestion du fichier CSV uploadé.
+     * Lis le CSV, mappe vers SkosConceptDto, puis normalise chaque DTO via l'assembler.
      */
     public void handleUpload() {
         importedConcepts.clear();
@@ -42,18 +47,15 @@ public class SkosConceptImportBean implements Serializable {
         }
 
         try (InputStream is = file.getInputStream()) {
+
             // Lire CSV avec détection BOM UTF-8
             List<CSVRecord> records = csvImportService.readCsv(is);
 
-            // Mapper directement vers SkosConceptDto
+            // Mapper vers SkosConceptDto
             importedConcepts = csvImportService.mapCsvToSkosConceptDto(records);
 
-            importedConcepts.forEach(dto -> {
-                dto.populateRelationsFromRaw();        // broader, narrower, related...
-                dto.populateNotesFromTranslations();   // definition, note, scopeNote...
-                dto.populateLabelsFromTranslations();  // prefLabel, altLabel...
-                dto.populateImagesFromRaw(); // pour les images
-            });
+            // Normalisation via l'assembler (relations, notes, labels, images)
+            importedConcepts.forEach(skosConceptMapper::finalizeMapping);
 
             message = "Fichier importé avec succès : " + importedConcepts.size() + " concepts lus.";
 

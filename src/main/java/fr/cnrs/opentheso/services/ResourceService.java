@@ -428,7 +428,7 @@ public class ResourceService {
         log.debug("Chargement de la liste de fils pour le concept '{}' du thésaurus '{}' trié par alphabétique", idConceptBT, idThesaurus);
         var result = resourceRepository.getNarrowersForGraph(idThesaurus, idConceptBT, idLang);
         if(CollectionUtils.isEmpty(result)) {
-            log.error("Aucun fils n'est trouvé pour le thésaurus '{}' (lang='{}')", idThesaurus, idLang);
+            log.debug("Aucun fils n'est trouvé pour le thésaurus '{}' (lang='{}')", idThesaurus, idLang);
             return Collections.emptyList();
         }
 

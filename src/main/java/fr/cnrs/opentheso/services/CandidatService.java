@@ -426,7 +426,7 @@ public class CandidatService {
             }
         }
 
-        log.error("Création du nouveau concept dans la base");
+        log.debug("Création du nouveau concept dans la base");
         var thesaurus = thesaurusRepository.findById(candidate.getThesoId());
         if (thesaurus.isEmpty()) {
             log.error("Le thésaurus avec id {} n'existe pas dans la base de données", candidate.getThesoId());

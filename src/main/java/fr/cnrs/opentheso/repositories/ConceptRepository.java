@@ -25,6 +25,45 @@ import java.util.Set;
 
 public interface ConceptRepository extends JpaRepository<Concept, Integer> {
 
+    @Modifying
+    @Transactional
+    @Query(value = """
+                INSERT INTO concept (
+                    id_concept,
+                    id_thesaurus,
+                    id_ark,
+                    notation,
+                    top_concept,
+                    creator,
+                    concept_type,
+                    status,
+                    created,
+                    modified
+                )
+                VALUES (
+                    :idConcept,
+                    :idThesaurus,
+                    :idArk,
+                    COALESCE(:notation, ''),
+                    :topConcept,
+                    COALESCE(:creator, -1),
+                    COALESCE(:conceptType, 'concept'),
+                    COALESCE(:status, 'D'),
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                )
+            """, nativeQuery = true)
+    void saveConcept(
+            @Param("idConcept") String idConcept,
+            @Param("idThesaurus") String idThesaurus,
+            @Param("idArk") String idArk,
+            @Param("notation") String notation,
+            @Param("topConcept") boolean topConcept,
+            @Param("creator") Integer creator,
+            @Param("conceptType") String conceptType,
+            @Param("status") String status
+    );
+
     @Query("SELECT c.idArk, c.idConcept " +
             "FROM Concept c " +
             "WHERE c.idArk IN :arkIds AND c.idThesaurus = :idTheso")
@@ -46,6 +85,8 @@ public interface ConceptRepository extends JpaRepository<Concept, Integer> {
     List<Concept> findByIdConcept(String idConcept);
 
     List<Concept> findAllByIdThesaurusAndNotationLike(String idThesaurus, String notation);
+
+    boolean existsByIdThesaurusAndNotation(String idThesaurus, String notation);
 
     Optional<Concept> findByIdConceptAndIdThesaurus(String idConcept, String idThesaurus);
 

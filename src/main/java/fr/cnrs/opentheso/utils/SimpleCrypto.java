@@ -25,6 +25,14 @@ public class SimpleCrypto {
         }
     }
 
+    public static String generateRandomApiKey(int lengthBytes) {
+        byte[] randomBytes = new byte[lengthBytes];
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(randomBytes);
+
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+    }
+
     public String encrypt(String plainText) {
         try {
             byte[] iv = new byte[IV_LENGTH_BYTE];

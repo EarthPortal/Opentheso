@@ -105,6 +105,7 @@ public class RdfImportService {
      * Les valeurs sont stockées dans dto.getLabels() sous forme Map<labelType, Map<lang, List<String>>>.
      */
     private void populateLabels(Model model, Resource subject, SkosConceptDto dto) {
+        // Boucle sur les trois types SKOS
         String[] labelTypes = {"prefLabel", "altLabel", "hiddenLabel"};
 
         for (String labelType : labelTypes) {
@@ -113,13 +114,15 @@ public class RdfImportService {
             for (Statement st : model.filter(subject, predicate, null)) {
                 if (st.getObject() instanceof Literal lit) {
                     String lang = lit.getLanguage().orElse("und");
+                    String value = lit.getLabel();
 
-                    // récupère ou crée la liste des labels pour ce type et cette langue
-                    List<String> values = dto.getLabels()
-                            .computeIfAbsent(labelType, k -> new HashMap<>())
-                            .computeIfAbsent(lang, k -> new ArrayList<>());
+                    if (value == null || value.isBlank()) continue;
 
-                    values.add(lit.getLabel());
+                    switch (labelType) {
+                        case "prefLabel" -> dto.setPrefLabel(lang, value);      // unique par langue
+                        case "altLabel"  -> dto.addAltLabel(lang, value);      // liste de valeurs
+                        case "hiddenLabel" -> dto.addHiddenLabel(lang, value); // liste de valeurs
+                    }
                 }
             }
         }

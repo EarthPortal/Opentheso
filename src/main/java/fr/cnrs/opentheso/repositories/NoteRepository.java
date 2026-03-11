@@ -85,4 +85,6 @@ public interface NoteRepository extends JpaRepository<Note, Integer> {
     @Modifying
     @Query(value = "UPDATE note SET id_thesaurus = :target WHERE id_concept = :concept AND id_thesaurus = :from", nativeQuery = true)
     void updateThesaurusByConcept(@Param("concept") String concept, @Param("from") String from, @Param("target") String target);
+
+    boolean existsByIdentifierAndIdThesaurusAndNoteTypeCodeAndLang(String identifier, String idThesaurus, String noteTypeCode, String lang);
 }

@@ -418,6 +418,7 @@ public class Tree implements Serializable {
     }
 
     private void expandToFacet(String idFacet) {
+        if(selectedNode == null) return;
         selectedNode.setExpanded(true);
         List<TreeNode> treeNodes = selectedNode.getChildren();
         for (TreeNode treeNode : treeNodes) {

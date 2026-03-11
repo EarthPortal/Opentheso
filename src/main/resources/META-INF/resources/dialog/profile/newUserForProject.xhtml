@@ -11,15 +11,16 @@
               resizable="false" position="top" style="margin-top: 30px">
 
         <h:form id="newUserForProjectForm">
-            <p:defaultCommand target="addUserBtn" />
+            <p:defaultCommand target="addUserBtn"/>
 
             <!-- Pseudo -->
             <div class="row">
                 <div class="col-5" style="text-align: right">
-                    <h:outputText value="#{langueBean.getMsg('profile.pseudo')} *" title="#{langueBean.getMsg('profile.tootltip_user')}"/>
+                    <h:outputText value="#{langueBean.getMsg('profile.pseudo')} *"
+                                  title="#{langueBean.getMsg('profile.tootltip_user')}"/>
                 </div>
                 <div class="col-7">
-                    <p:inputText value="#{newUserBean.nodeUser.name}" style="width: 100%" />
+                    <p:inputText value="#{newUserBean.nodeUser.name}" style="width: 100%"/>
                 </div>
             </div>
 
@@ -29,7 +30,17 @@
                     <h:outputText value="#{langueBean.getMsg('profile.email')} *"/>
                 </div>
                 <div class="col-7">
-                    <p:inputText value="#{newUserBean.nodeUser.mail}" style="width: 100%" autocomplete="off" />
+                    <p:inputText value="#{newUserBean.nodeUser.mail}" style="width: 100%" autocomplete="off"/>
+                </div>
+            </div>
+
+            <!-- Institution -->
+            <div class="row" style="margin-top: 5px;">
+                <div class="col-5" style="text-align: right">
+                    <h:outputText value="#{langueBean.getMsg('profile.institution')}"/>
+                </div>
+                <div class="col-7">
+                    <p:inputText value="#{newUserBean.nodeUser.institution}" style="width: 100%"/>
                 </div>
             </div>
 
@@ -42,59 +53,66 @@
                     <p:selectOneRadio value="#{newUserBean.creationMode}" layout="lineDirection">
                         <f:selectItem itemLabel="#{langueBean.getMsg('profile.localPassword')}" itemValue="DIRECT"/>
                         <f:selectItem itemLabel="#{langueBean.getMsg('profile.emailValidation')}" itemValue="EMAIL"/>
-                        <p:ajax listener="#{newUserBean.updatePasswordFields()}" update="newUserForProjectForm"/>
+                        <p:ajax listener="#{newUserBean.updatePasswordFields()}"
+                                update="newUserForProjectForm:passwordChoice"/>
                     </p:selectOneRadio>
                 </div>
             </div>
 
             <!-- Mot de passe (visible seulement si mode DIRECT) -->
-            <h:panelGroup id="passwordSection" rendered="#{newUserBean.creationMode eq 'DIRECT'}">
-                <div class="row" style="margin-top: 5px;">
-                    <div class="col-5" style="text-align: right" >
-                        <h:outputText value="#{langueBean.getMsg('menu.password')} *" />
+            <h:panelGroup id="passwordChoice">
+                <h:panelGroup id="passwordSection" rendered="#{newUserBean.creationMode eq 'DIRECT'}">
+                    <div class="row" style="margin-top: 5px;">
+                        <div class="col-5" style="text-align: right">
+                            <h:outputText value="#{langueBean.getMsg('menu.password')} *"/>
+                        </div>
+                        <div class="col-7">
+                            <p:password id="password1" value="#{newUserBean.passWord1}"
+                                        style="width:100%" autocomplete="off"
+                                        feedback="true"
+                                        promptLabel="#{langueBean.getMsg('password.prompt')}"
+                                        weakLabel="#{langueBean.getMsg('password.weak')}"
+                                        goodLabel="#{langueBean.getMsg('password.good')}"
+                                        strongLabel="#{langueBean.getMsg('password.strong')}">
+                                <f:validator validatorId="passwordValidator"/>
+                            </p:password>
+                            <p:message for="password1"/>
+                        </div>
                     </div>
-                    <div class="col-7">
-                        <p:password id="password1" value="#{newUserBean.passWord1}"
-                                    style="width:100%" autocomplete="off"
-                                    feedback="true"
-                                    promptLabel="#{langueBean.getMsg('password.prompt')}"
-                                    weakLabel="#{langueBean.getMsg('password.weak')}"
-                                    goodLabel="#{langueBean.getMsg('password.good')}"
-                                    strongLabel="#{langueBean.getMsg('password.strong')}">
-                            <f:validator validatorId="passwordValidator"/>
-                        </p:password>
-                        <p:message for="password1"/>
-                    </div>
-                </div>
 
-                <div class="row" style="margin-top: 5px;">
-                    <div class="col-5" style="text-align: right">
-                        <h:outputText value="#{langueBean.getMsg('profile.confirmation')} #{langueBean.getMsg('menu.password')} * " />
+                    <div class="row" style="margin-top: 5px;">
+                        <div class="col-5" style="text-align: right">
+                            <h:outputText
+                                    value="#{langueBean.getMsg('profile.confirmation')} #{langueBean.getMsg('menu.password')} * "/>
+                        </div>
+                        <div class="col-7">
+                            <p:password value="#{newUserBean.passWord2}" style="width: 100%" autocomplete="off"/>
+                        </div>
                     </div>
-                    <div class="col-7">
-                        <p:password value="#{newUserBean.passWord2}" style="width: 100%" autocomplete="off"/>
-                    </div>
-                </div>
+                </h:panelGroup>
             </h:panelGroup>
 
             <!-- Alertes par mail -->
             <div class="row" style="margin-top: 5px;">
                 <div class="col-5" style="text-align: right">
-                    <h:outputText value="#{langueBean.getMsg('profile.alert_by_email')}" title="#{langueBean.getMsg('profile.alert_by_emailTooltip')}"/>
+                    <h:outputText value="#{langueBean.getMsg('profile.alert_by_email')}"
+                                  title="#{langueBean.getMsg('profile.alert_by_emailTooltip')}"/>
                 </div>
                 <div class="col-7">
-                    <p:toggleSwitch id="isAlertMail" value="#{newUserBean.nodeUser.alertMail}" onIcon="pi pi-times" offIcon="pi pi-check"/>
+                    <p:toggleSwitch id="isAlertMail" value="#{newUserBean.nodeUser.alertMail}" onIcon="pi pi-times"
+                                    offIcon="pi pi-check"/>
                 </div>
-                <p:tooltip value="#{langueBean.getMsg('profile.alert_by_emailTooltip')}" showDelay="500" for="isAlertMail" />
+                <p:tooltip value="#{langueBean.getMsg('profile.alert_by_emailTooltip')}" showDelay="500"
+                           for="isAlertMail"/>
             </div>
 
             <!-- Projet courant -->
             <div class="row" style="margin-top: 5px;">
                 <div class="col-5" style="text-align: right">
-                    <h:outputText value="#{langueBean.getMsg('profile.currentProject')}"  style="font-size: 12px;"/>
+                    <h:outputText value="#{langueBean.getMsg('profile.currentProject')}" style="font-size: 12px;"/>
                 </div>
                 <div class="col-7">
-                    <h:outputText value="#{myProjectBean.selectedProjectName}"  />
+                    <h:outputText value="#{myProjectBean.selectedProjectName}"/>
                 </div>
             </div>
 
@@ -102,15 +120,17 @@
             <h:panelGroup id="userRoleDef">
                 <div class="row" style="margin-top: 5px;">
                     <div class="col-5" style="text-align: right">
-                        <h:outputText value="#{langueBean.getMsg('profile.role')} " />
+                        <h:outputText value="#{langueBean.getMsg('profile.role')} "/>
                     </div>
                     <div class="col-7">
                         <p:selectOneMenu value="#{newUserBean.selectedRole}"
-                                         styleClass="selectOneMenu_custom" panelStyleClass="selectOneMenu_panelStyle_custom"
+                                         styleClass="selectOneMenu_custom"
+                                         panelStyleClass="selectOneMenu_panelStyle_custom"
                                          style="width: 100%; background: none; box-shadow: none;"
                                          panelStyle="border: none; box-shadow: none; max-width: 300px">
                             <p:ajax event="change" update="newUserForProjectForm:userRoleDef"/>
-                            <f:selectItems value="#{myProjectBean.myAuthorizedRoles}" var="myRoles" itemLabel="#{myRoles.value}" itemValue="#{myRoles.id}"/>
+                            <f:selectItems value="#{myProjectBean.myAuthorizedRoles}" var="myRoles"
+                                           itemLabel="#{myRoles.value}" itemValue="#{myRoles.id}"/>
                         </p:selectOneMenu>
                     </div>
                 </div>
@@ -119,24 +139,33 @@
                     <!-- Limitation sur thésaurus -->
                     <div class="row" style="margin-top: 5px;">
                         <div class="col-5" style="text-align: right">
-                            <h:outputText value="#{langueBean.getMsg('profile.limitRoleOnTheso')}" title="#{langueBean.getMsg('profile.limitRoleOnThesoTooltip')}"/>
+                            <h:outputText value="#{langueBean.getMsg('profile.limitRoleOnTheso')}"
+                                          title="#{langueBean.getMsg('profile.limitRoleOnThesoTooltip')}"/>
                         </div>
                         <div class="col-7">
-                            <p:toggleSwitch id="limitToThesaurus" value="#{newUserBean.limitOnThesaurus}" onIcon="pi pi-times" offIcon="pi pi-check">
-                                <p:ajax listener="#{newUserBean.toggleLimitThesaurus()}" update="newUserForProjectForm:userRoleDef"/>
+                            <p:toggleSwitch id="limitToThesaurus" value="#{newUserBean.limitOnThesaurus}"
+                                            onIcon="pi pi-times" offIcon="pi pi-check">
+                                <p:ajax listener="#{newUserBean.toggleLimitThesaurus()}"
+                                        update="newUserForProjectForm:userRoleDef"/>
                             </p:toggleSwitch>
                         </div>
-                        <p:tooltip value="#{langueBean.getMsg('profile.limitRoleOnThesoTooltip')}" showDelay="500" for="limitToThesaurus" />
+                        <p:tooltip value="#{langueBean.getMsg('profile.limitRoleOnThesoTooltip')}" showDelay="500"
+                                   for="limitToThesaurus"/>
                     </div>
 
                     <h:panelGroup rendered="#{newUserBean.limitOnThesaurus}">
                         <div class="row" style="margin-top: 5px;">
                             <div class="col-5" style="text-align: right">
-                                <h:outputText value="#{langueBean.getMsg('profile.list_of_thesauri')}" style="font-size: 12px;"/>
+                                <h:outputText value="#{langueBean.getMsg('profile.list_of_thesauri')}"
+                                              style="font-size: 12px;"/>
                             </div>
                             <div class="col-7">
-                                <p:selectManyMenu value="#{newUserBean.selectedThesaurus}" styleClass="manymenu-advanced" showCheckbox="true" style="width: 100%;">
-                                    <f:selectItems value="#{newUserBean.listThesaurusOfProject}" var="allThesoProject" itemLabel="#{allThesoProject.value} (#{allThesoProject.id})" itemValue="#{allThesoProject.id}"/>
+                                <p:selectManyMenu value="#{newUserBean.selectedThesaurus}"
+                                                  styleClass="manymenu-advanced" showCheckbox="true"
+                                                  style="width: 100%;">
+                                    <f:selectItems value="#{newUserBean.listThesaurusOfProject}" var="allThesoProject"
+                                                   itemLabel="#{allThesoProject.value} (#{allThesoProject.id})"
+                                                   itemValue="#{allThesoProject.id}"/>
                                 </p:selectManyMenu>
                             </div>
                         </div>
@@ -148,16 +177,16 @@
             <div style="width: 100%; text-align: right; margin-top: 15px; margin-bottom: 5px;">
                 <p:commandButton value="#{langueBean.getMsg('candidat.close')}" style="margin-right: 10px"
                                  icon="fas fa-undo-alt" styleClass="ui-button-secondary button"
-                                 ajax="true" oncomplete="PF('newUserForProject').hide();" update="idNewUserForProject" />
+                                 ajax="true" oncomplete="PF('newUserForProject').hide();" update="idNewUserForProject"/>
 
                 <p:commandButton id="addUserBtn" value="#{langueBean.getMsg('btnValidate')}"
                                  icon="pi pi-check"
                                  styleClass="ui-button-success"
                                  update="messageIndex newUserForProjectForm containerIndex:tabViewRoles"
-                                 action="#{newUserBean.addUser(false)}" />
+                                 action="#{newUserBean.addUser(false)}"/>
             </div>
 
-            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}" />
+            <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}"/>
         </h:form>
     </p:dialog>
 </ui:fragment>

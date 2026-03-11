@@ -354,7 +354,6 @@ public class ArkService {
                         MessageUtils.showWarnMessage("Échec génération ARK : " + e.getMessage());
                         return false;
                     }
-
                 }
             }
         }

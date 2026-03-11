@@ -18,6 +18,7 @@ public class NodeUser implements Serializable {
     private int idUser;
     private String name;
     private String mail;
+    private String institution;
     private boolean active;
     private boolean alertMail;
     private boolean superAdmin;

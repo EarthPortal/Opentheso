@@ -229,7 +229,7 @@ public class CurrentUser implements Serializable {
     }
 
     public void setUser(User user) {
-        nodeUser = new NodeUser(user.getId(), user.getUsername(), user.getMail(), user.getActive(),
+        nodeUser = new NodeUser(user.getId(), user.getUsername(), user.getMail(), user.getInstitution(), user.getActive(),
                 user.getAlertMail(), user.getIsSuperAdmin(), user.getPassToModify(),
                 user.getApiKey(), user.getKeyNeverExpire(), user.getKeyExpiresAt(),
                 user.getIsServiceAccount(), user.getKeyDescription());
@@ -271,7 +271,7 @@ public class CurrentUser implements Serializable {
         }
 
         // on récupère le compte de l'utilisateur
-        nodeUser = new NodeUser(user.getId(), user.getUsername(), user.getMail(), user.getActive(),
+        nodeUser = new NodeUser(user.getId(), user.getUsername(), user.getMail(), user.getInstitution(), user.getActive(),
                 user.getAlertMail(), user.getIsSuperAdmin(), user.getPassToModify(),
                 user.getApiKey(), user.getKeyNeverExpire(), user.getKeyExpiresAt(),
                 user.getIsServiceAccount(), user.getKeyDescription());
