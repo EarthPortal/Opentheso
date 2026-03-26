@@ -23,6 +23,7 @@ public class AlignementSource {
     private String description;
     // deprecated
     private boolean isGps;
+    private boolean isGlobal;
 
     public String getSource_filter() {
         if(StringUtils.isEmpty(source_filter)) return "";
@@ -38,5 +39,6 @@ public class AlignementSource {
         this.id = alignementSource.id;
         this.description = alignementSource.description;
         this.isGps = alignementSource.isGps;
+        this.isGlobal = alignementSource.isGlobal;
     }
 }

@@ -188,7 +188,7 @@ public class WriteRdf4j {
         if (new ToolsHelper().isValidURI(conceptScheme.getUri())) {
             builder.subject(vf.createIRI(conceptScheme.getUri()));
         } else {
-            throw new IllegalArgumentException("URI invalide : " + conceptScheme.getUri());
+            throw new IllegalArgumentException("URI invalide : " + conceptScheme.getUri() + "_ Concept : " +  conceptScheme.getUri());
         }
         builder.add(RDF.TYPE, SKOS.CONCEPT_SCHEME);
 

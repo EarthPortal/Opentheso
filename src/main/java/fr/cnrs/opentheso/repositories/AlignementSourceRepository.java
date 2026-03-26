@@ -7,10 +7,24 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 
 public interface AlignementSourceRepository extends JpaRepository<AlignementSource, Integer> {
+
+    // Méthode dérivée Spring Data pour récupérer les sources globales
+    List<AlignementSource> findByIsGlobalTrue();
+
+   // List<AlignementSource> findByIsGlobalTrueOrIdThesaurusOwner(String idThesaurus);
+
+    @Query("""
+                SELECT a 
+                FROM AlignementSource a
+                WHERE a.isGlobal = true OR a.idThesaurusOwner = :idThesaurus
+                ORDER BY a.isGlobal ASC, a.source ASC
+            """)
+    List<AlignementSource> findByIsGlobalTrueOrIdThesaurusOwner(@Param("idThesaurus") String idThesaurus);
 
     @Transactional
     @Modifying
@@ -18,12 +32,12 @@ public interface AlignementSourceRepository extends JpaRepository<AlignementSour
     int deleteByIdAlignementSource(int id);
 
     @Query(value = """
-        SELECT a.gps, a.source, a.requete, a.type_rqt AS typeRequete,a.alignement_format, a.id, a.description, a.source_filter
-        FROM alignement_source a
-        JOIN thesaurus_alignement_source tas ON tas.id_alignement_source = a.id
-        WHERE tas.id_thesaurus = :idThesaurus
-        ORDER BY a.source ASC
-    """, nativeQuery = true)
+                SELECT a.gps, a.source, a.requete, a.type_rqt AS typeRequete,a.alignement_format, a.id, a.description, a.source_filter
+                FROM alignement_source a
+                JOIN thesaurus_alignement_source tas ON tas.id_alignement_source = a.id
+                WHERE tas.id_thesaurus = :idThesaurus
+                ORDER BY a.source ASC
+            """, nativeQuery = true)
     List<AlignementSourceProjection> findAllByThesaurus(@Param("idThesaurus") String idThesaurus);
 
 }

@@ -77,6 +77,7 @@ public class ViewEditorHomeBean implements Serializable {
         selectedTheso.setOptionThesoSelected("Option1");
 
         reset();
+        MessageUtils.showInformationMessage("Code Analytics ajouté avec succès !");
         PrimeFaces.current().ajax().update("containerIndex");
     }
 

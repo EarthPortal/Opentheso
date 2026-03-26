@@ -49,4 +49,10 @@ public class AlignementSource {
 
     @Column(name = "source_filter", nullable = false)
     private String sourceFilter = "Opentheso";
+
+    @Column(name = "is_global", nullable = false)
+    private Boolean isGlobal = true;
+
+    @Column(name = "id_thesaurus_owner")
+    private String idThesaurusOwner;
 }
