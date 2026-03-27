@@ -32,7 +32,7 @@ public class GraphService implements Serializable {
         log.debug("Rechercher les informations complètes pour toutes les vues de l'utilisateur {}", idUser);
         var graphViewsList = graphViewRepository.findAllByIdUser(idUser);
         if (graphViewsList.isEmpty()) {
-            log.error("Aucun graphView n'est trouvé pour l'id user {}", idUser);
+            log.debug("Aucun graphView n'est trouvé pour l'id user {}", idUser);
             return new HashMap<>();
         }
 
