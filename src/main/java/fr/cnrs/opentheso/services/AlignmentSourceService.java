@@ -25,11 +25,12 @@ public class AlignmentSourceService {
     private final AlignementSourceRepository alignementSourceRepository;
     private final ThesaurusAlignementSourceRepository thesaurusAlignementSourceRepository;
 
-
-    public List<AlignementSource> getAllAlignementSources() {
+    // récupère toutes les sources d'alignement disponible et partagées pour tous les thésaurus
+    public List<AlignementSource> getGlobalAlignementSources(String idThesaurus) {
 
         log.debug("Recherche de tous les sources d'alignement disponible");
-        var alignmentSources = alignementSourceRepository.findAll();
+        //var alignmentSources = alignementSourceRepository.findByIsGlobalTrue();
+        var alignmentSources = alignementSourceRepository.findByIsGlobalTrueOrIdThesaurusOwner(idThesaurus);
 
         if (CollectionUtils.isEmpty(alignmentSources)) {
             log.debug("Aucune source d'alignement n'est trouvée dans la base");
@@ -46,6 +47,7 @@ public class AlignmentSourceService {
                             .description(element.getDescription())
                             .source_filter(element.getSourceFilter())
                             .isGps(element.getGps())
+                            .isGlobal(element.getIsGlobal())
                             .build()
             ).toList();
         }
@@ -121,6 +123,8 @@ public class AlignmentSourceService {
                 .idUser(idUser)
                 .gps(false)
                 .sourceFilter(StringUtils.isEmpty(alignement.getSource_filter()) ? "Opentheso" : alignement.getSource_filter())
+                .isGlobal(false)
+                .idThesaurusOwner(idThesaurus)
                 .build());
 
         if (StringUtils.isNotEmpty(idThesaurus)) {

@@ -11353,6 +11353,9 @@ body.sidebar-toggled footer.sticky-footer {
     font-size: 0.8rem !important;
 }
 
+body .ui-button.ui-button-icon-only .ui-button-text {
+    padding: 0;
+}
 
 /* images spécifiques */
 
@@ -11361,4 +11364,20 @@ body.sidebar-toggled footer.sticky-footer {
     width: 28px;  /* ajustez en fonction de la taille de votre image */
     height: 28px;  /* ajustez en fonction de la taille de votre image */
     display: inline-block;
+}
+
+/* 🔒 Sources globales */
+.global-row {
+    background-color: #eaecf4 !important;
+    border-left: 4px solid #b7b9cc;
+}
+
+/* 🧑 Sources locales */
+.local-row {
+    background-color: #ffffff;
+}
+
+/* Optionnel : effet hover propre */
+.ui-datatable tbody tr.global-row:hover {
+    background-color: #ffe8d6 !important;
 }

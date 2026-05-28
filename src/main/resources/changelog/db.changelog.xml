@@ -214,4 +214,17 @@
         <sqlFile path="v26.01/26-01_04.sql" relativeToChangelogFile="true" splitStatements="false"/>
     </changeSet>
     <include file="/changelog/v26.02/26_02_01.xml"/>
+    <changeSet id="26.03.01" author="Miled">
+        <sqlFile path="../changelog/v26/26-03_01.sql" relativeToChangelogFile="true" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="26.03.03" author="Miled">
+        <sqlFile path="v26/26-03_03.sql" relativeToChangelogFile="true" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="26.03.04" author="Miled">
+        <sqlFile path="v26/26-03_04.sql" relativeToChangelogFile="true" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="26.06.01" author="Miled">
+        <sqlFile path="v26/26-06_01.sql" relativeToChangelogFile="true" splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>

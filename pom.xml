@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cnrs.opentheso</groupId>
     <artifactId>opentheso</artifactId>
-    <version>26.02.07</version>
+    <version>26.05.06</version>
     <packaging>jar</packaging>
     <name>opentheso</name>
 
@@ -349,6 +349,12 @@
             <version>22.1</version> <!-- Vérifiez la dernière version compatible -->
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.graphql</groupId>
+            <artifactId>spring-graphql</artifactId>
+            <version>1.3.1</version> <!-- correspond à Spring Boot 3.3 -->
+        </dependency>
+
 
 
 
@@ -442,7 +448,7 @@
         <spring-webmvc.version>6.1.14</spring-webmvc.version>
         <spring-web.version>6.1.13</spring-web.version>
         <xmlunit-core.version>2.10.0</xmlunit-core.version>
-        <postgresql.version>42.7.2</postgresql.version>
+        <postgresql.version>42.7.11</postgresql.version>
         <jsf-api.version>2.2.20</jsf-api.version>
 <!--        <primefaces-themes.version>1.0.10</primefaces-themes.version> -->
 

@@ -16,5 +16,6 @@ public class NodeSelectedAlignment {
     private String sourceLabel;
     private String sourceDescription;
     private boolean isSelected;
+    private boolean isGlobal;
     
 }

@@ -13,6 +13,9 @@ import java.io.IOException;
 import jakarta.inject.Named;
 import jakarta.enterprise.context.SessionScoped;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -63,13 +66,40 @@ public class DeleteThesaurusBean implements Serializable {
      */
     public void deleteThesaurus(CurrentUser currentUser) throws IOException {
 
-        if(idThesaurusToDelete == null) return;
+        /**
+         * Bloc qui permet de supprimer une liste de thésaurus à activer pour la maintenance ou migration
+         */
 
-        var nodePreference = preferenceService.getThesaurusPreferences(idThesaurusToDelete);
-        if(nodePreference != null) {
-            if(deletePerennialIdentifiers) {
-                conceptService.deleteAllIdHandle(idThesaurusToDelete);
+        /*
+        List<String> ids = thesaurusService.getAllIdOfThesaurus(true);
+
+        List<String> idToKeep = Arrays.asList("th116", "th112");
+
+        for (String id : ids) {
+
+            // On garde ceux présents dans la liste
+            if (idToKeep.contains(id)) {
+                continue;
             }
+
+            thesaurusService.deleteDroitByThesaurus(id);
+
+            if (!thesaurusService.deleteThesaurus(id)) {
+                MessageUtils.showErrorMessage(
+                        "Erreur pendant la suppression du thésaurus : " + id
+                );
+                return;
+            }
+        }*/
+        /**
+         * Fin de Bloc qui permet de supprimer une liste de thésaurus à activer pour la maintenance ou migration
+         */
+
+
+
+        if(idThesaurusToDelete == null) return;
+        if(deletePerennialIdentifiers) {
+            conceptService.deleteAllIdHandle(idThesaurusToDelete);
         }
 
         thesaurusService.deleteDroitByThesaurus(idThesaurusToDelete);
@@ -89,6 +119,7 @@ public class DeleteThesaurusBean implements Serializable {
         }
 
         init();
+
         MessageUtils.showInformationMessage("Thesaurus supprimé avec succès");
         roleOnThesoBean.showListThesaurus(currentUser, selectedTheso.getCurrentIdTheso());
     }

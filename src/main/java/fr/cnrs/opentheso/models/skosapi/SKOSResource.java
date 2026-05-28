@@ -160,7 +160,7 @@ public class SKOSResource {
         if (new ToolsHelper().isValidURI(v)) {
             matchList.add(new SKOSMatch(v, prop));
         } else {
-            log.error("URI invalide : " + v);
+            log.debug("URI invalide : " + v);
         }
     }
 

@@ -1,21 +1,11 @@
 package fr.cnrs.opentheso.services;
 
-import fr.cnrs.opentheso.entites.NonPreferredTerm;
-import fr.cnrs.opentheso.entites.Permuted;
-import fr.cnrs.opentheso.entites.PreferredTerm;
-import fr.cnrs.opentheso.entites.TermHistorique;
+import fr.cnrs.opentheso.entites.*;
 import fr.cnrs.opentheso.models.NodeEMProjection;
 import fr.cnrs.opentheso.models.terms.NodeTerm;
 import fr.cnrs.opentheso.models.terms.NodeTermTraduction;
 import fr.cnrs.opentheso.models.terms.Term;
-import fr.cnrs.opentheso.repositories.ConceptGroupConceptRepository;
-import fr.cnrs.opentheso.repositories.ConceptRepository;
-import fr.cnrs.opentheso.repositories.NonPreferredTermHistoriqueRepository;
-import fr.cnrs.opentheso.repositories.NonPreferredTermRepository;
-import fr.cnrs.opentheso.repositories.PermutedRepository;
-import fr.cnrs.opentheso.repositories.PreferredTermRepository;
-import fr.cnrs.opentheso.repositories.TermHistoriqueRepository;
-import fr.cnrs.opentheso.repositories.TermRepository;
+import fr.cnrs.opentheso.repositories.*;
 import fr.cnrs.opentheso.utils.StringUtils;
 
 import lombok.AllArgsConstructor;
@@ -47,6 +37,43 @@ public class TermService {
     private final NonPreferredTermRepository nonPreferredTermRepository;
     private final ConceptGroupConceptRepository conceptGroupConceptRepository;
     private final NonPreferredTermHistoriqueRepository nonPreferredTermHistoriqueRepository;
+
+
+    /// new methods #MR
+    public boolean updatePrefLabel(String idConcept,
+                                String idThesaurus,
+                                String lang,
+                                String label,
+                                int idUser) {
+
+        if (org.apache.commons.lang3.StringUtils.isBlank(label)) {
+            throw new IllegalArgumentException("Label vide interdit");
+        }
+        int updatedRows = termRepository.updatePrefLabel(
+                idConcept,
+                idThesaurus,
+                lang,
+                label.trim(),
+                idUser
+        );
+        if(updatedRows > 0) {
+         /*   conceptService.updateDateOfConcept(idThesaurus,
+                    idConcept,
+                    idUser);
+
+            conceptDcTermRepository.save(ConceptDcTerm.builder()
+                    .name(DCMIResource.CONTRIBUTOR)
+                    .value("currentUser.getNodeUser().getName()")
+                    .idConcept(idConcept)
+                    .idThesaurus(idThesaurus)
+                    .build());*/
+
+
+        //    conceptRepository.updateDateOfConcept(idConcept, idThesaurus, idUser);
+        }
+        return updatedRows > 0;
+    }
+
 
 
     public String addTerm(Term term, String idConcept, int idUser) {

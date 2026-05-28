@@ -11,12 +11,7 @@ import fr.cnrs.opentheso.models.users.NodeUserComplet;
 import fr.cnrs.opentheso.models.users.NodeUserGroupUser;
 import fr.cnrs.opentheso.models.users.NodeUserRole;
 import fr.cnrs.opentheso.models.users.NodeUserRoleGroup;
-import fr.cnrs.opentheso.repositories.RoleRepository;
-import fr.cnrs.opentheso.repositories.UserGroupLabelRepository;
-import fr.cnrs.opentheso.repositories.UserGroupThesaurusRepository;
-import fr.cnrs.opentheso.repositories.UserRepository;
-import fr.cnrs.opentheso.repositories.UserRoleGroupRepository;
-import fr.cnrs.opentheso.repositories.UserRoleOnlyOnRepository;
+import fr.cnrs.opentheso.repositories.*;
 import fr.cnrs.opentheso.utils.MD5Password;
 
 import lombok.AllArgsConstructor;
@@ -52,6 +47,7 @@ public class UserService {
     private final UserGroupLabelRepository userGroupLabelRepository;
     private final UserGroupThesaurusRepository userGroupThesaurusRepository;
     private final PasswordEncoder passwordEncoder; // BCrypt
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
 
     public Optional<User> findByMail(String mail) {
@@ -438,7 +434,7 @@ public class UserService {
 
     public User getUserByUserName(String userName) {
 
-        var user = userRepository.findAllByUsername(userName);
+        var user = userRepository.findByUsername(userName);
         if (user.isEmpty()) {
             log.error("Aucun utilisateur n'est trouvé avec l'userName {}", userName);
             return null;
@@ -466,6 +462,9 @@ public class UserService {
         User user = userOpt.get();
         String storedHash = user.getPassword();
         boolean matches = false;
+        if(storedHash == null) {
+            return null;
+        }
 
         if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$")) {
             // mot de passe déjà en BCrypt
@@ -542,9 +541,11 @@ public class UserService {
         return nodeUserGroupUsers;
     }
 
+    @Transactional
     public void deleteUserById(int idUser) {
 
         log.debug("Supprimer l'utilisateur id {}", idUser);
+        passwordResetTokenRepository.deleteByUserId(idUser);
         userRepository.deleteById(idUser);
     }
 

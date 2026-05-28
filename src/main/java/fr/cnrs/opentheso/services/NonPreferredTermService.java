@@ -6,9 +6,12 @@ import fr.cnrs.opentheso.models.terms.NodeEM;
 import fr.cnrs.opentheso.models.terms.Term;
 import fr.cnrs.opentheso.repositories.NonPreferredTermHistoriqueRepository;
 import fr.cnrs.opentheso.repositories.NonPreferredTermRepository;
+import fr.cnrs.opentheso.ws.openapi.exception.LabelAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +28,14 @@ public class NonPreferredTermService {
     private final NonPreferredTermRepository nonPreferredTermRepository;
     private final NonPreferredTermHistoriqueRepository nonPreferredTermHistoriqueRepository;
 
-
     @Transactional
-    public void addNonPreferredTerm(Term term, int idUser) {
+    public boolean addNonPreferredTerm(Term term, int idUser) {
 
         log.debug("Enregistrement du nouveau synonyme");
+        if(nonPreferredTermRepository.isAltLabelExist(term.getLexicalValue().trim(),
+                term.getIdThesaurus(), term.getLang())){
+            return false;
+        }
         nonPreferredTermRepository.save(NonPreferredTerm.builder()
                 .idTerm(term.getIdTerm())
                 .lexicalValue(term.getLexicalValue())
@@ -43,6 +49,7 @@ public class NonPreferredTermService {
                 .build());
 
         saveTrace(term.getIdTerm(), term.getLexicalValue(), term.getIdTerm(), term.getLang(), idUser, term.isHidden(), "ADD");
+        return true;
     }
 
     public void deleteNonPreferredTerm(String idTerm, String idLang, String lexicalValue, String idTheso, int idUser) {

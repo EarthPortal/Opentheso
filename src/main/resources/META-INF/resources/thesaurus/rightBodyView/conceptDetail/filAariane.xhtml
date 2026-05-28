@@ -69,7 +69,7 @@
                             update="idApproveConcept" action="#{editConcept.reset('')}"
                             oncomplete="PF('approveConcept').show();"  />
 
-                <p:menuitem disabled="false" rendered="#{!copyAndPasteBetweenThesaurus.isCopyOn()}"
+                <p:menuitem disabled="true" rendered="#{!copyAndPasteBetweenThesaurus.isCopyOn()}"
                             value="#{langueBean.getMsg('rightbody.concept.copy_to_another_thesaurus')}"
                             actionListener="#{copyAndPasteBetweenThesaurus.onStartCopy()}"
                             icon="fas fa-regular fa-copy" update="containerIndex:rightTab messageIndex" />

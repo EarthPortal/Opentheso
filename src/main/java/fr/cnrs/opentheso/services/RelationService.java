@@ -18,6 +18,7 @@ import fr.cnrs.opentheso.repositories.HierarchicalRelationshipRepository;
 import fr.cnrs.opentheso.repositories.NtTypeRepository;
 import fr.cnrs.opentheso.repositories.TermRepository;
 
+import fr.cnrs.opentheso.services.mappers.SkosRelationMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -45,6 +46,63 @@ public class RelationService {
     private final ConceptTypeService conceptTypeService;
     private final TermService termService;
     private final NtTypeRepository ntTypeRepository;
+
+
+    // Fonction générique pour ajouter tout type de relations #MR
+    @Transactional
+    public boolean addRelation(String idConcept1, String idThesaurus, String idConcept2, String relationType, int idUser) {
+        try {
+            log.debug("Ajouter la relation {} entre {} et {}", relationType, idConcept1, idConcept2);
+
+            // Créer la relation principale
+            HierarchicalRelationship mainRel = HierarchicalRelationship.builder()
+                    .idConcept1(idConcept1)
+                    .idConcept2(idConcept2)
+                    .idThesaurus(idThesaurus)
+                    .role(relationType)
+                    .build();
+            hierarchicalRelationshipRepository.save(mainRel);
+
+            // Relations symétriques : RT
+            if (isSymmetricRelation(relationType)) {
+                HierarchicalRelationship inverseRel = HierarchicalRelationship.builder()
+                        .idConcept1(idConcept2)
+                        .idConcept2(idConcept1)
+                        .idThesaurus(idThesaurus)
+                        .role(relationType)
+                        .build();
+                hierarchicalRelationshipRepository.save(inverseRel);
+            }
+
+            // Relations asymétriques avec inverse (BT ↔ NT, BTI ↔ NTI, etc.)
+            String inverseRelation = SkosRelationMapper.inverseRelationMap.get(relationType);
+            if (inverseRelation != null) {
+                HierarchicalRelationship inverseRel = HierarchicalRelationship.builder()
+                        .idConcept1(idConcept2)
+                        .idConcept2(idConcept1)
+                        .idThesaurus(idThesaurus)
+                        .role(inverseRelation)
+                        .build();
+                hierarchicalRelationshipRepository.save(inverseRel);
+            }
+
+            // Ajouter dans l'historique
+            addRelationHistorique(idConcept1, idThesaurus, idConcept2, relationType, idUser, "ADD");
+
+            return true;
+        } catch (Exception e) {
+            log.error("Erreur lors de l'ajout de la relation {}", relationType, e);
+            return false;
+        }
+    }
+
+    /**
+     * Retourne true si la relation doit être symétrique
+     */
+    private boolean isSymmetricRelation(String relationType) {
+        return Set.of("RT").contains(relationType);
+    }
+
 
 
     public HierarchicalRelationship addHierarchicalRelation(String idConcept1, String idThesaurus, String role, String idConcept2) {

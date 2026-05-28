@@ -33,7 +33,7 @@ public class ForgotPasswordBean implements Serializable {
         }
 
         // Génère et envoie le token si l'utilisateur existe
-        passwordResetService.requestPasswordReset(sendTo);
+        passwordResetService.requestPasswordReset(sendTo, false);
 
         // Message générique pour éviter l’énumération des emails
         message = "Si un compte existe pour cette adresse, un email de réinitialisation a été envoyé.";

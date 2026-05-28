@@ -1,0 +1,68 @@
+# type pour le résultat de retour des réponses
+type MutationResponse {
+    success: Boolean!
+    message: String
+    idConcept: String
+    idThesaurus: String
+}
+
+# Types réutilisables
+
+type ConceptLabel {
+    label: String
+    idLang: String
+}
+
+type ConceptRelation {
+    Uri: String
+    label: String
+    idConcept: String
+    role: String
+}
+
+type ConceptNote {
+    idLang: String
+    label: String
+    noteSource: String
+}
+
+type ConceptIdLabel {
+    uri: String
+    identifier: String
+    label: String
+}
+
+type ResourceGPS {
+    latitude: Float
+    longitude: Float
+}
+
+type ConceptImage {
+    imageName: String
+    copyRight: String
+    creator: String
+    uri: String
+}
+
+# Inputs pour mutations ciblées
+
+input LabelInput {
+    lang: String!
+    value: String!
+}
+
+input NoteInput {
+    type: String!
+    lang: String!
+    value: String!
+}
+
+input RelationInput {
+    type: String!
+    targetUri: String!
+}
+
+input GeoInput {
+    latitude: Float!
+    longitude: Float!
+}

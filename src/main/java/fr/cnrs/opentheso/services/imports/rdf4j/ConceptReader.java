@@ -306,6 +306,13 @@ public class ConceptReader {
                     nodeImage.setUri(value.stringValue());
                     skosConcept.addNodeImage(nodeImage);
                     break;
+                case "image":
+                    NodeImage nodeImage2 = new NodeImage();
+                    nodeImage2.setImageName("");
+                    nodeImage2.setCopyRight("");
+                    nodeImage2.setUri(value.stringValue());
+                    skosConcept.addNodeImage(nodeImage2);
+                    break;
 
                 //Replaces
                 case "replaces":

@@ -22,9 +22,12 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
+import org.apache.jena.sparql.function.library.leviathan.log;
 
 import javax.net.ssl.*;
 
+@Log4j2
 @Getter
 @Setter
 public class SearchCorpus2 {
@@ -34,6 +37,7 @@ public class SearchCorpus2 {
         haveCorpus = false;
         if (nodeFullConcept != null) {
             for (NodeCorpus nodeCorpus : nodeCorpuses) {
+
                 // cas où on compose uniquement une URL de lien vers les notices
                 if (nodeCorpus.isOnlyUriLink()) {
                     if (nodeCorpus.getUriLink().contains("##id##")) {
@@ -107,7 +111,6 @@ public class SearchCorpus2 {
     private int getCountOfResourcesFromHttp(String uri) {
         String output;
         StringBuilder json = new StringBuilder();
-
         try {
             // ------------------- TRUST MANAGER PERMISSIF (TEST) -------------------
             TrustManager[] trustAllCerts = new TrustManager[] {
@@ -124,6 +127,7 @@ public class SearchCorpus2 {
             // -----------------------------------------------------------------------
 
             URL url = new URL(uri);
+
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             conn.setRequestMethod("GET");
@@ -131,7 +135,7 @@ public class SearchCorpus2 {
             conn.setRequestProperty("User-Agent", "JavaHttpClient"); // optionnel mais recommandé
             conn.setUseCaches(false);
             conn.setDoInput(true);
-            conn.setConnectTimeout(5000);
+            conn.setConnectTimeout(10000);
             conn.setReadTimeout(5000);
 
             int status = conn.getResponseCode();
@@ -151,7 +155,6 @@ public class SearchCorpus2 {
         } catch (Exception ex) {
             Logger.getLogger(ConceptView.class.getName()).log(Level.SEVERE, null, ex + " " + uri);
         }
-
         return -1;
     }
 

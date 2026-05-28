@@ -134,8 +134,6 @@ public class NoteService {
         note = StringUtils.clearValue(note);
         note = StringUtils.clearNoteFromP(note);
         note = StringEscapeUtils.unescapeXml(note);
-      //  note = StringUtils.convertString(note);
-      //  noteSource = StringUtils.convertString(noteSource);
 
         if(isNoteExistInThatLang(identifier, idThesaurus, idLang, noteTypeCode)) {
             log.debug("Mise à jour d'une note existante");

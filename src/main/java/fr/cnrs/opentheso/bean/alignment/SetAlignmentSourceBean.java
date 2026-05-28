@@ -129,7 +129,7 @@ public class SetAlignmentSourceBean implements Serializable {
     public void initSourcesList() {
 
         // toutes les sources d'alignements
-        allAlignementSources = alignmentSourceService.getAllAlignementSources();
+        allAlignementSources = alignmentSourceService.getGlobalAlignementSources(selectedTheso.getCurrentIdTheso());
         nodeSelectedAlignmentsAll = new ArrayList<>();
 
         // la liste des sources sélectionnées pour le thésaurus en cours
@@ -142,6 +142,7 @@ public class SetAlignmentSourceBean implements Serializable {
             nodeSelectedAlignment.setSourceLabel(allAlignementSource.getSource());
             nodeSelectedAlignment.setSourceDescription(allAlignementSource.getDescription());
             nodeSelectedAlignment.setSelected(false);
+            nodeSelectedAlignment.setGlobal(allAlignementSource.isGlobal());
             nodeSelectedAlignmentsAll.add(nodeSelectedAlignment);
         }
 

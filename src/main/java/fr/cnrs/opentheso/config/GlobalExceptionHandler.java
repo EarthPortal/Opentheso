@@ -1,6 +1,8 @@
 package fr.cnrs.opentheso.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,12 +12,12 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 
 @ControllerAdvice
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 
     // Gestion des erreurs 500
     @ExceptionHandler(Exception.class)
     public ModelAndView handleException(HttpServletRequest request, Exception ex, Model model) {
-
         System.out.println("ERRuuuur : " + ex.getMessage());
         if (getHttpStatus(request).equals(HttpStatus.INTERNAL_SERVER_ERROR)) {
             model.addAttribute("errorMessage", ex.getMessage());

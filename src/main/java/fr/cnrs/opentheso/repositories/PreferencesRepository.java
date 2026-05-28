@@ -12,6 +12,8 @@ import java.util.Optional;
 
 public interface PreferencesRepository extends JpaRepository<Preferences, Integer> {
 
+    boolean existsByPreferredName(String preferredName);
+
     Optional<Preferences> findByIdThesaurus(String idThesaurus);
 
     @Transactional

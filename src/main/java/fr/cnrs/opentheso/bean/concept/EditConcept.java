@@ -92,7 +92,7 @@ public class EditConcept implements Serializable {
     private final PreferenceBean preferenceBean;
 
     private String prefLabel, source, notation, selectedConceptType;
-    private boolean applyToBranch, reciprocalRelationship, isCreated, duplicate, forDelete, inProgress, replacedByRTRelation;
+    private boolean applyToBranch, reciprocalRelationship, isCreated, duplicate, forDelete, inProgress, replacedByRTRelation, forceDeletePolyhierarchy;
     private NodeSearchMini searchSelected;
     private List<NodeIdValue> nodeIdValues, nodeReplaceBy;
     private NodeConceptType nodeConceptTypeToDelete, nodeConceptTypeToAdd;
@@ -112,6 +112,7 @@ public class EditConcept implements Serializable {
         nodeIdValues = null;
         nodeConceptTypeToDelete = null;
         nodeConceptTypeToAdd = new NodeConceptType();
+        forceDeletePolyhierarchy = false;
     }
 
     public void reset(String label) {
@@ -125,6 +126,7 @@ public class EditConcept implements Serializable {
         nodeIdValues = null;
         nodeConceptTypeToDelete = null;
         nodeConceptTypeToAdd = new NodeConceptType();
+        forceDeletePolyhierarchy = false;
 
         nodeReplaceBy = conceptView.getNodeConcept().getReplacedBy();
     }
@@ -137,6 +139,7 @@ public class EditConcept implements Serializable {
         reciprocalRelationship = false;
         nodeConceptTypeToDelete = null;
         nodeConceptTypeToAdd = new NodeConceptType();
+        forceDeletePolyhierarchy = false;
     }
 
     public void removeAllConceptFromCollection(String idGroup){
@@ -347,11 +350,11 @@ public class EditConcept implements Serializable {
 
     public void infosDelete() {
 
-        if (conceptView.getNodeConcept().getNodeNT().isEmpty()) { // pas d'enfants
+      /*  if (conceptView.getNodeConcept().getNodeNT().isEmpty()) { // pas d'enfants
             MessageUtils.showWarnMessage(languageBean.getMsg("rightbody.conceptdialog.infoDeleteConcept"));// rightbody.conceptdialog.infoDeleteConcept "La suppression du concept est définitive !!";
         } else {
             MessageUtils.showWarnMessage(languageBean.getMsg("rightbody.conceptdialog.infoDeleteBranch")); //"La suppression de la branche est définitive !!";
-        }
+        }*/
         forDelete = true;
     }
 
@@ -376,7 +379,7 @@ public class EditConcept implements Serializable {
         } else {
             /// suppression d'une branche
             if(!conceptService.deleteBranchConcept(conceptView.getNodeConcept().getConcept().getIdConcept(),
-                    selectedThesaurus.getCurrentIdTheso())){
+                    selectedThesaurus.getCurrentIdTheso(), forceDeletePolyhierarchy)){
                 MessageUtils.showErrorMessage("La suppression a échoué, vérifier la poly-hiérarchie pour le concept");
                 return;                
             }

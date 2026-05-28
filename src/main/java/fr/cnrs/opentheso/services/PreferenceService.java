@@ -17,6 +17,19 @@ public class PreferenceService {
 
     public void initPreferences(String idThesaurus, String workLanguage) {
 
+        // contrôle du (preferredname s'il existe avant), si oui, il faut l'incrémenter
+        String basePreferredName = idThesaurus;
+        String preferredName = basePreferredName;
+
+        int index = 1;
+
+        // Vérifie les doublons et incrémente
+        while (preferencesRepository.existsByPreferredName(preferredName)) {
+            preferredName = basePreferredName + "_" + index;
+            index++;
+        }
+
+
         log.debug("Initialisation des préférences pour le thésaurus {}", idThesaurus);
         preferencesRepository.save(Preferences.builder()
                 .idThesaurus(idThesaurus)
@@ -29,7 +42,7 @@ public class PreferenceService {
                 .uriArk("https://ark.mom.fr/ark:/")
                 .cheminSite("http://mondomaine.fr/")
                 .originalUri("http://mondomaine.fr")
-                .preferredName(idThesaurus)
+                .preferredName(preferredName)
                 .identifierType(2)
                 .autoExpandTree(true)
                 .webservices(true)
@@ -108,6 +121,7 @@ public class PreferenceService {
 
         if (preference.isEmpty()) {
             log.debug("Aucun paramètre n'est trouvé pour le thésaurus id {}", idThesaurus);
+            initPreferences(idThesaurus, "fr");
             return null ;
         }
 

@@ -13,14 +13,13 @@
                                       title="#{langueBean.getMsg('rightbody.concept.tooltip_preferred_term')}"
                                       style="font-size: 14px; font-weight: bold; color: #8f8f8f !important;"/>
                     </div> 
-                    <div class="col-xl-9 col-lg-8 col-md-7 col-sm-7" style="margin-left: -10px">
+                    <div class="col-xl-9 col-lg-8 col-md-7 col-sm-7" style="margin-left: -6px">
                         <h:panelGroup rendered="#{currentUser.hasRoleAsManager}">
-                            <p:menuButton 
-                                icon="fas fa-cog" style="margin-top: -4px; font-size: 10px !important; color: #f47b2a">
-                                <p:menuitem value="#{langueBean.getMsg('rightbody.concept.rename_concept')}"
-                                            actionListener="#{editConcept.reset(conceptView.nodeFullConcept.prefLabel.label)}"
-                                            oncomplete="PF('renameConcept').show();" update="containerIndex:idRenameConcept" icon="fas fa-edit" />
-                            </p:menuButton>
+                            <p:commandButton title="#{langueBean.getMsg('rightbody.concept.rename_concept')}"
+                                             icon="fas fa-cog" style="color: #f47b2a"
+                                             styleClass="rounded-button ui-button-warning ui-button-flat"
+                                             actionListener="#{editConcept.reset(conceptView.nodeFullConcept.prefLabel.label)}"
+                                             oncomplete="PF('renameConcept').show();" update="containerIndex:idRenameConcept" />
                         </h:panelGroup>
 
                         <h:outputText rendered="#{!conceptView.nodeFullConcept.deprecated}"
@@ -57,12 +56,12 @@
                         <p:tooltip for="textPrefLabel" value="#{conceptView.nodeFullConcept.identifier}" showDelay="1000" />
                         <p:tooltip for="textPrefLabelDep" value="#{conceptView.nodeFullConcept.identifier}" showDelay="1000" />
 
-                        <p:commandButton rendered="#{!roleOnThesaurus.nodePreference.autoExpandTree}" icon="fas fa-sitemap fa-l"
-                                         title="#{langueBean.getMsg('rightbody.concept.replace_in_tree')}"
+                        <p:commandButton id="btnFocusInTree" icon="fas fa-sitemap fa-l"
                                          action="#{tree.expandTreeToPath(conceptView.nodeFullConcept.identifier,
                                                    selectedThesaurus.currentIdTheso, conceptView.nodeFullConcept.prefLabel.idLang)}"
                                          actionListener="#{selectedThesaurus.actionFromConceptToOn()}" update="containerIndex"
-                                         style="color:#f47b2a; background: none; border: none; box-shadow: none; margin-left: 20px;" />
+                                         style="color:#f47b2a; background: none; border: none; box-shadow: none; margin-left: 1px;"  />
+                        <p:tooltip for="btnFocusInTree" value="#{langueBean.getMsg('rightbody.concept.replace_in_tree')}" />
                     </div>
                 </div>
             </div>
@@ -387,6 +386,7 @@
                         <div class="col-xl-9 col-lg-8 col-md-7 col-sm-7" style="margin-left: -10px">
                             <h:panelGroup rendered="#{conceptView.nodeCorpuses != null}">
                                 <ui:repeat var="corpus" value="#{conceptView.nodeCorpuses}" >
+
                                     <h:panelGroup rendered="#{(corpus.count != 0 and corpus.count!= -1) or (corpus.onlyUriLink)}">
                                         <div class="row">
                                             <h:panelGroup rendered="#{!corpus.onlyUriLink}">

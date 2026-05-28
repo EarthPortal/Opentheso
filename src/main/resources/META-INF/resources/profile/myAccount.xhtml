@@ -210,6 +210,8 @@
                                     </div>
                                 </div>
                             </div>
+
+                            #{(myAccountBean.nodeUser.apiKey)}
                             <!-- Gestion de la clé d'API -->
                             <div class="card mb-4 py-3 border-left-success"
                                  style="margin-top: 5px; vertical-align: central; margin: 30px; margin-top: -10px">
@@ -224,7 +226,7 @@
                                             <!-- Si l'utilisateur a une clé -->
                                             <p:inputText
                                                     rendered="#{myAccountBean.nodeUser.apiKeyExpireDate!=null or myAccountBean.nodeUser.keyNeverExpire}"
-                                                    value="#{myAccountBean.displayedKey}"
+                                                    value="#{myAccountBean.apiKeyPlain}"
                                                     style="width: 100%; height: 100%" readonly="true"/>
 
                                             <!-- Si l'utilisateur n'a pas de clé -->

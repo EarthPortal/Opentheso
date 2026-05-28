@@ -167,12 +167,12 @@ public class AlignmentManualBean implements Serializable {
     public void addManualAlignement(CandidatBean candidatBean, String idConcept, boolean isFromConceptView){
 
         if(StringUtils.isEmpty(manualAlignmentUri)){
-            MessageUtils.showInformationMessage("Veuillez saisir une valeur  !");
+            MessageUtils.showErrorMessage("Veuillez saisir une valeur  !");
             return;
         } 
 
         if(!fr.cnrs.opentheso.utils.StringUtils.urlValidator(manualAlignmentUri)){
-            MessageUtils.showInformationMessage("L'URL n'est pas valide !");
+            MessageUtils.showErrorMessage("L'URL n'est pas valide !");
             return;            
         }
 

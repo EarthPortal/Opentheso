@@ -5,12 +5,11 @@ import fr.cnrs.opentheso.entites.User;
 import fr.cnrs.opentheso.entites.UserGroupLabel;
 import fr.cnrs.opentheso.models.nodes.NodeIdValue;
 import fr.cnrs.opentheso.models.users.NodeUser;
-import fr.cnrs.opentheso.services.ThesaurusService;
-import fr.cnrs.opentheso.services.UserRoleGroupService;
-import fr.cnrs.opentheso.services.UserService;
+import fr.cnrs.opentheso.services.*;
 
 import fr.cnrs.opentheso.bean.profile.MyProjectBean;
 import fr.cnrs.opentheso.bean.profile.SuperAdminBean;
+import fr.cnrs.opentheso.services.utils.BaseUrl;
 import fr.cnrs.opentheso.utils.MessageUtils;
 
 import jakarta.inject.Named;
@@ -37,6 +36,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class NewUserBean implements Serializable {
 
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetService passwordResetService;
     @Value("${settings.workLanguage:fr}")
     private String workLanguage;
 
@@ -45,6 +45,8 @@ public class NewUserBean implements Serializable {
     private final SuperAdminBean superAdminBean;
     private final ThesaurusService thesaurusService;
     private final UserRoleGroupService userRoleGroupService;
+    private final MailService mailService;
+    private final BaseUrl baseUrl;
 
     private NodeUser nodeUser;
     private boolean limitOnThesaurus;
@@ -53,6 +55,8 @@ public class NewUserBean implements Serializable {
     private List<Roles> nodeAllRoles;
     private List<NodeIdValue> listThesaurusOfProject;
     private List<String> selectedThesaurus;
+    private String creationMode = "EMAIL"; // DIRECT ou EMAIL
+
 
     public void init(String selectedProject) {
         nodeUser = new NodeUser();
@@ -63,6 +67,7 @@ public class NewUserBean implements Serializable {
         limitOnThesaurus = false;
         listThesaurusOfProject = null;
         selectedThesaurus = null;
+        creationMode = "EMAIL"; // par défaut
     }   
     
     public void initForSuperAdmin() {
@@ -73,6 +78,7 @@ public class NewUserBean implements Serializable {
         listThesaurusOfProject = null;
         selectedThesaurus = null;
         limitOnThesaurus = false;
+        creationMode = "EMAIL"; // par défaut
 
         nodeAllProjects = userRoleGroupService.findAllUserRoleGroup();
         nodeAllProjects.sort(Comparator.comparing(UserGroupLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
@@ -95,44 +101,87 @@ public class NewUserBean implements Serializable {
     }
     
     public void addUser(boolean bySuperAdmin){
+        if(!checkUserDatas()) return;
 
-        if(checkUserDatas()) {
-            var userCreated = saveUser();
-            saveRole(userCreated);
-            MessageUtils.showInformationMessage("Utilisateur créé avec succès !!!");
+        User userCreated;
 
-            if (bySuperAdmin) {
-                superAdminBean.init();
-                initForSuperAdmin();
-            } else {
-                myProjectBean.setLists();
-            }
-
-            PrimeFaces.current().executeScript("PF('newUserForProject').hide();");
+        if("EMAIL".equals(creationMode)) {
+            userCreated = saveUserByEmail();
+        } else {
+            userCreated = saveUserDirect();
         }
+
+        if(userCreated == null) return;
+
+        saveRole(userCreated);
+        MessageUtils.showInformationMessage("Utilisateur créé avec succès !!!");
+
+        if (bySuperAdmin) {
+            superAdminBean.init();
+            initForSuperAdmin();
+        } else {
+            myProjectBean.setLists();
+        }
+
+        PrimeFaces.current().executeScript("PF('newUserForProject').hide();");
     }
 
-    private User saveUser() {
+    private User saveUserDirect() {
         var user = User.builder()
                 .mail(nodeUser.getMail())
                 .username(nodeUser.getName())
-                .password(passwordEncoder.encode(passWord1))//MD5Password.getEncodedPassword(passWord1))
+                .institution(nodeUser.getInstitution())
+                .password(passwordEncoder.encode(passWord1))
                 .isSuperAdmin(nodeUser.isSuperAdmin())
                 .alertMail(nodeUser.isAlertMail())
                 .isServiceAccount(nodeUser.isServiceAccount())
                 .active(true)
+                .verified(true)
                 .keyNeverExpire(false)
                 .passToModify(false)
+                .rgpdConsent(true)
                 .build();
+
+        return userService.saveUser(user);
+    }
+
+    private User saveUserByEmail() {
+        // Création de l'utilisateur en base
+        var user = User.builder()
+                .mail(nodeUser.getMail())
+                .username(nodeUser.getName())
+                .institution(nodeUser.getInstitution())
+                .isSuperAdmin(nodeUser.isSuperAdmin())
+                .alertMail(nodeUser.isAlertMail())
+                .isServiceAccount(nodeUser.isServiceAccount())
+                .active(false)           // compte inactif
+                .verified(false)
+                .keyNeverExpire(false)
+                .passToModify(true)      // mot de passe à définir
+                .rgpdConsent(true)
+                .build();
+
         var userCreated = userService.saveUser(user);
-        if(ObjectUtils.isEmpty(userCreated)) {
-            MessageUtils.showErrorMessage("Erreur pendant la création de l'utilisateur !!!");
+        if (userCreated == null) {
+            MessageUtils.showErrorMessage("Erreur pendant la création");
             return null;
         }
+
+        // Utilisation du PasswordResetService pour créer le token et envoyer le mail
+        try {
+            passwordResetService.requestPasswordReset(userCreated.getMail(), true);
+        } catch (Exception e) {
+            MessageUtils.showWarnMessage(
+                    "Utilisateur créé mais le serveur mail est indisponible. Vous pourrez renvoyer le mail plus tard."
+            );
+        }
+
+        MessageUtils.showInformationMessage("Un mail a été envoyé pour définir le mot de passe et activer le compte");
         return userCreated;
     }
 
     private boolean checkUserDatas() {
+
         if(ObjectUtils.isEmpty(nodeUser)) {
             MessageUtils.showErrorMessage("Aucun utilisateur à ajouter !!!");
             return false;
@@ -143,25 +192,8 @@ public class NewUserBean implements Serializable {
             return false;
         }
 
-        if(StringUtils.isEmpty(passWord1)) {
-            MessageUtils.showErrorMessage("Le mot de passe est obligatoire");
-            return false;
-        }
-
-        if (!passWord1.matches(".*[A-Z].*") ||
-                !passWord1.matches(".*[a-z].*") ||
-                !passWord1.matches(".*\\d.*") ||
-                !passWord1.matches(".*[^A-Za-z\\d].*")) {
-            MessageUtils.showErrorMessage("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial");
-            return false;
-        }
-
-        if(StringUtils.isEmpty(passWord2)) {
-            MessageUtils.showErrorMessage("Le mot de passe est obligatoire");
-            return false;
-        }
-        if(!passWord1.equals(passWord2)) {
-            MessageUtils.showErrorMessage("Le mot de passe n'est pas identique");
+        if(StringUtils.isEmpty(nodeUser.getMail())) {
+            MessageUtils.showErrorMessage("Email obligatoire");
             return false;
         }
 
@@ -169,11 +201,35 @@ public class NewUserBean implements Serializable {
             MessageUtils.showErrorMessage("Email existe déjà");
             return false;
         }
-
-        nodeUser.setName(nodeUser.getName().trim());
-        if(userService.getUserByMail(nodeUser.getName()) != null) {
+        if(userService.getUserByUserName(nodeUser.getName()) != null) {
             MessageUtils.showErrorMessage("Pseudo existe déjà");
             return false;
+        }
+
+        nodeUser.setName(nodeUser.getName().trim());
+
+        if("DIRECT".equals(creationMode)) {
+
+            if(StringUtils.isEmpty(passWord1) || StringUtils.isEmpty(passWord2)) {
+                MessageUtils.showErrorMessage("Mot de passe obligatoire");
+                return false;
+            }
+
+            if(!passWord1.equals(passWord2)) {
+                MessageUtils.showErrorMessage("Mot de passe non identique");
+                return false;
+            }
+
+            if (!passWord1.matches(".*[A-Z].*") ||
+                    !passWord1.matches(".*[a-z].*") ||
+                    !passWord1.matches(".*\\d.*") ||
+                    !passWord1.matches(".*[^A-Za-z\\d].*")) {
+
+                MessageUtils.showErrorMessage(
+                        "Mot de passe invalide (majuscule, minuscule, chiffre, spécial requis)"
+                );
+                return false;
+            }
         }
 
         if(StringUtils.isEmpty(selectedRole)) {
@@ -189,6 +245,13 @@ public class NewUserBean implements Serializable {
         }
 
         return true;
+    }
+
+    public void updatePasswordFields() {
+        if("EMAIL".equals(creationMode)) {
+            passWord1 = null;
+            passWord2 = null;
+        }
     }
 
     private void saveRole(User userCreated) {

@@ -23,6 +23,9 @@ public class SecurityConfigNoAuth {
         return http
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.disable())
+                )
                 .build();
     }
 

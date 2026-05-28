@@ -118,13 +118,15 @@
                                           title="#{langueBean.getMsg('rightbody.concept.notation')}"
                                           style="font-size: 14px; font-weight: bold; color: #8f8f8f"/>
                         </div>
-                        <div class="col-xl-9 col-lg-8 col-md-7 col-sm-7" style="margin-left: -10px">
-                            <p:menuButton rendered="#{currentUser.hasRoleAsManager}"
-                                          icon="fas fa-cog" style="color: #F7A269; background: none; border: none; box-shadow: none; font-size: 13px;">
-                                <p:menuitem value="#{langueBean.getMsg('rightbody.concept.add_edit_notation')}"
-                                            action="#{notationBean.reset()}" update="containerIndex:idSetNotation" icon="fas fa-edit"
-                                            oncomplete="PF('setNotation').show();"  />
-                            </p:menuButton>
+                        <div class="col-xl-9 col-lg-8 col-md-7 col-sm-7" style="margin-left: -6px">
+
+                            <p:commandButton rendered="#{currentUser.hasRoleAsManager}"
+                                             title="#{langueBean.getMsg('rightbody.concept.add_edit_notation')}"
+                                             action="#{notationBean.reset()}" update="containerIndex:idSetNotation" icon="fas fa-cog"
+                                             style="color: #f47b2a"
+                                             styleClass="rounded-button ui-button-warning ui-button-flat"
+                                             oncomplete="PF('setNotation').show();"  />
+
                             <h:panelGroup rendered="#{(conceptView.nodeFullConcept.notation == null) or (conceptView.nodeFullConcept.notation == '') }">
                                 <h:outputText  value="....." title="#{langueBean.getMsg('rightbody.concept.no_value')}" style="font-size: 13px; color: grey; font-style: italic " />
                             </h:panelGroup>
