@@ -377,16 +377,18 @@ public class ConceptService {
         return true;
     }
 
-    public boolean deleteBranchConcept(String idConceptTop, String idThesaurus) {
+    public boolean deleteBranchConcept(String idConceptTop, String idThesaurus, boolean forceDeletePolyHierarchy) {
 
         log.debug("Suppression du concept (id {}) avec ses relations et traductions", idConceptTop);
         var idConcepts = getIdsOfBranch2(idThesaurus, idConceptTop);
 
         // test si les concepts fils ont une poly-hiérarchie, on refuse la suppression (qui peut supprimer plusieurs branches
-        for (String idConcept : idConcepts) {
-            if (relationService.isConceptHaveManyRelationBT(idConcept, idThesaurus)) {
-                log.error("Le concept id {} dispose de plusieurs relation de type BT", idConcept);
-                return false;
+        if(!forceDeletePolyHierarchy) {
+            for (String idConcept : idConcepts) {
+                if (relationService.isConceptHaveManyRelationBT(idConcept, idThesaurus)) {
+                    log.debug("Le concept id {} dispose de plusieurs relation de type BT", idConcept);
+                    return false;
+                }
             }
         }
 

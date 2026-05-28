@@ -30,22 +30,23 @@ public class NodeConceptTree implements Comparable <NodeConceptTree>{
         this.title = "";
     }
 
-   
     @Override
     public int compareTo(NodeConceptTree o) {
-        if(StringUtils.isEmpty(o.getTitle())) return 0;
-        if(!StringUtils.isEmpty(title) && title.equalsIgnoreCase(o.getTitle())) return 0;
+        if (this.title == null && o.title == null) return 0;
+        if (this.title == null) return 1;
+        if (o.title == null) return -1;
 
-        String str1 = StringUtils.defaultIfEmpty(this.title, "");
-        String str2 = StringUtils.defaultIfEmpty(o.getTitle(), "");        
-
-        if(StringUtils.isEmpty(this.title)) return 0;
-        str1 = Normalizer.normalize(this.title, Normalizer.Form.NFD);
-        str1 = str1.replaceAll("[^\\p{ASCII}]", "");
-        str2 = Normalizer.normalize(((NodeConceptTree)o).title, Normalizer.Form.NFD);
-        str2 = str2.replaceAll("[^\\p{ASCII}]", "");
+        String str1 = normalize(this.title);
+        String str2 = normalize(o.title);
 
         return naturalCompare(str1, str2, true);
+    }
+
+    private String normalize(String s) {
+        if (s == null) return "";
+
+        String normalized = Normalizer.normalize(s, Normalizer.Form.NFD);
+        return normalized.replaceAll("[^\\p{ASCII}]", "").toLowerCase();
     }
 
     public int naturalCompare(String a, String b, boolean ignoreCase) {

@@ -2,8 +2,11 @@ package fr.cnrs.opentheso.ws.openapi.v2;
 
 import fr.cnrs.opentheso.entites.User;
 import fr.cnrs.opentheso.models.skos.SkosConceptDto;
-import fr.cnrs.opentheso.services.ConceptServiceWS;
+import fr.cnrs.opentheso.services.ConceptAddServiceWS;
+import fr.cnrs.opentheso.services.UserService;
+import fr.cnrs.opentheso.services.security.AuthorizationService;
 import fr.cnrs.opentheso.ws.openapi.exception.ApiKeyInvalidException;
+import fr.cnrs.opentheso.ws.openapi.exception.UserCantWriteOnThesaurusException;
 import org.springframework.http.MediaType;
 import fr.cnrs.opentheso.ws.openapi.helper.ApiKeyState;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +25,9 @@ import java.net.URI;
 @RequiredArgsConstructor
 @Tag(name = "Api v2")
 public class AddConceptController {
-    private final ConceptServiceWS conceptServiceWS;
+    private final ConceptAddServiceWS conceptAddServiceWS;
+    private final UserService userService;
+    private final AuthorizationService authorizationService;
 
     /* exemple complet d'objet Json
 {
@@ -128,7 +133,10 @@ public class AddConceptController {
         if (user == null) {
             throw new ApiKeyInvalidException(ApiKeyState.INVALID);
         }
-        SkosConceptDto saved = conceptServiceWS.createConcept(dto, idThesaurus, user.getId());
+        if (!authorizationService.canUserWrite(user.getId(), idThesaurus)) {
+            throw new UserCantWriteOnThesaurusException();
+        }
+        SkosConceptDto saved = conceptAddServiceWS.createConcept(dto, idThesaurus, user.getId());
         return ResponseEntity
                 .created(URI.create(
                         "/api/v2/thesaurus/" + idThesaurus +

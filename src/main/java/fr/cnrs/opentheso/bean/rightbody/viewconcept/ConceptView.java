@@ -319,7 +319,6 @@ public class ConceptView implements Serializable {
                             .build())
                     .toList();
         }
-
         nodeCorpuses = searchCorpus2.SearchCorpus(nodeCorpuses, nodeFullConcept);
         haveCorpus = searchCorpus2.isHaveCorpus();
         if(!haveCorpus) {

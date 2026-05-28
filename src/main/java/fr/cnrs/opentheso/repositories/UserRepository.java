@@ -13,8 +13,10 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
 
+
+
     // Retourne seulement userId et apikey pour tous les utilisateurs
-    @Query("SELECT u.id, u.apiKey FROM User u")
+    @Query("SELECT u.id, u.apiKey, u.username FROM User u")
     List<Object[]> findAllUserIdAndApiKey();
 
     Optional<User> findAllByUsername(String username);

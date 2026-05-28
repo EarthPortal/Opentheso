@@ -75,4 +75,14 @@ public interface UserRoleOnlyOnRepository extends JpaRepository<UserRoleOnlyOn, 
     @Transactional
     @Query("UPDATE UserRoleOnlyOn t SET t.thesaurus.idThesaurus = :newIdThesaurus WHERE t.thesaurus.idThesaurus = :oldIdThesaurus")
     void updateThesaurusId(@Param("newIdThesaurus") String newIdThesaurus, @Param("oldIdThesaurus") String oldIdThesaurus);
+
+
+    @Query("""
+        SELECT urg.group.id
+        FROM UserRoleOnlyOn urg
+        JOIN UserGroupThesaurus ugt ON urg.group.id = ugt.idGroup
+        WHERE urg.user.id = :userId AND ugt.idThesaurus = :thesoId
+    """)
+    Optional<Integer> findGroupIdByUserIdAndThesaurusId(@Param("userId") int userId, @Param("thesoId") String thesoId);
+
 }

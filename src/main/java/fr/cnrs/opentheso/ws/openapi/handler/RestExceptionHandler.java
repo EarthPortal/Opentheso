@@ -84,6 +84,17 @@ public class RestExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(UserCantWriteOnThesaurusException.class)
+    public ProblemDetail handleFailPermission(UserCantWriteOnThesaurusException ex, HttpServletRequest request) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+        problem.setTitle("Unauthorized");
+        problem.setDetail("The user does not have write access to this thesaurus.");
+        problem.setInstance(URI.create(request.getRequestURI()));
+        problem.setProperty("timestamp", OffsetDateTime.now());
+        problem.setProperty("errorCode", "No right");
+        return problem;
+    }
+
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneric(Exception ex, HttpServletRequest request) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);

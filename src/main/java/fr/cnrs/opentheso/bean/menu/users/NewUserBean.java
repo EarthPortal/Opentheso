@@ -201,6 +201,10 @@ public class NewUserBean implements Serializable {
             MessageUtils.showErrorMessage("Email existe déjà");
             return false;
         }
+        if(userService.getUserByUserName(nodeUser.getName()) != null) {
+            MessageUtils.showErrorMessage("Pseudo existe déjà");
+            return false;
+        }
 
         nodeUser.setName(nodeUser.getName().trim());
 

@@ -3005,10 +3005,10 @@ public class ImportFileBean implements Serializable {
                     csvImportHelper.addSingleConcept(selectedTheso.getCurrentIdTheso(),
                             idPere, null, currentUser.getNodeUser().getIdUser(), conceptObject, nodePreference);
                 } else {
-                    for (String idBT : conceptObject.getBroaders()) {
+                   // for (String idBT : conceptObject.getBroaders()) {
                         csvImportHelper.addSingleConcept(selectedTheso.getCurrentIdTheso(),
-                                idBT, null, currentUser.getNodeUser().getIdUser(), conceptObject, nodePreference);
-                    }
+                                null, null, currentUser.getNodeUser().getIdUser(), conceptObject, nodePreference);
+                   // }
                 }
             }
             loadDone = false;

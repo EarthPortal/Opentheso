@@ -22,4 +22,6 @@ public interface PasswordResetTokenRepository extends JpaRepository<PasswordRese
                 AND t.used = false
             """)
     void invalidateAllActiveTokensForUser(Integer userId);
+
+    void deleteByUserId(Integer userId);
 }

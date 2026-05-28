@@ -4,7 +4,6 @@ import fr.cnrs.opentheso.bean.importexport.newcsvimport.SkosConceptImageDto;
 import fr.cnrs.opentheso.entites.Gps;
 import fr.cnrs.opentheso.entites.PreferredTerm;
 import fr.cnrs.opentheso.models.skos.SkosConceptDto;
-import fr.cnrs.opentheso.models.skosapi.SKOSProperty;
 import fr.cnrs.opentheso.models.terms.Term;
 import fr.cnrs.opentheso.repositories.*;
 import fr.cnrs.opentheso.services.mappers.SkosAlignmentMapper;
@@ -27,7 +26,7 @@ import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
-public class ConceptServiceWS {
+public class ConceptAddServiceWS {
 
     private final ThesaurusRepository thesaurusRepository;
     private final ConceptRepository conceptRepository;

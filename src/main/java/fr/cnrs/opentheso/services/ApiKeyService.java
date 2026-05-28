@@ -55,6 +55,7 @@ public class ApiKeyService {
                     User user = new User();
                     user.setId(userId);
                     user.setApiKey(encryptedKey);
+                    user.setUsername((String) row[2]);
                     return Optional.of(user);
                 }
             } catch (Exception e) {

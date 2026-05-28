@@ -13,7 +13,17 @@
             <div class="row">
                 <div class="col-12">
                     <h:outputText value="#{langueBean.getMsg('rightbody.conceptdialog.term')} : " />
-                    <h:outputText value="#{conceptView.nodeConcept.term.lexicalValue}" style="color: #C63632;" />
+
+                    <h:panelGroup rendered="#{not empty conceptView.nodeConcept.concept.idConcept}">
+                        <h:outputText value="#{conceptView.nodeConcept.term.lexicalValue}" style="color: #C63632;" />
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{empty conceptView.nodeConcept.concept.idConcept}">
+                        <h:outputText value="#{candidatBean.getCandidatSelected().getNomPref()}" style="color: #C63632;" />
+                    </h:panelGroup>
+
+
+
                 </div>
             </div>
 

@@ -22,7 +22,7 @@ public class PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private final BaseUrl baseUrl;
 
-    private static final int TOKEN_EXPIRATION_MINUTES = 30;
+    private static final int TOKEN_EXPIRATION_MINUTES = 2880; // 48 heures
 
     public PasswordResetService(UserRepository userRepository,
                                 PasswordResetTokenRepository tokenRepository,
@@ -67,24 +67,24 @@ public class PasswordResetService {
                 subject = "Activation de votre compte Opentheso";
                 body = String.format(
                         "Bonjour,<br/><br/>" +
-                                "Un compte a été créé pour vous sur <strong>Opentheso</strong>.<br/>" +
-                                "Pour activer votre compte et définir votre mot de passe, cliquez sur le lien ci-dessous (valable 30 minutes) :<br/><br/>" +
+                                "Un compte \"%s\" a été créé pour vous sur <strong>Opentheso</strong> \"%s\".<br/>" +
+                                "Pour activer votre compte et définir votre mot de passe, cliquez sur le lien ci-dessous (valable %d minutes) :<br/><br/>" +
                                 "<a href=\"%s\">Activer mon compte</a><br/><br/>" +
                                 "Si vous n’êtes pas à l’origine de cette demande, vous pouvez ignorer ce mail.<br/><br/>" +
                                 "Cordialement,<br/>L'équipe Opentheso",
-                        resetLink
+                        user.getUsername(), baseUrl.getBaseUrl(), TOKEN_EXPIRATION_MINUTES, resetLink
                 );
             } else {
                 subject = "Réinitialisation de votre mot de passe Opentheso";
                 body = String.format(
                         "Bonjour,<br><br>" +
-                                "Vous avez fait une demande de réinitialisation de votre mot de passe sur Opentheso.<br>" +
+                                "Vous avez fait (\"%s\") une demande de réinitialisation de votre mot de passe sur Opentheso.<br>" +
                                 "Pour définir un nouveau mot de passe, cliquez sur le lien suivant : " +
                                 "<a href=\"%s\">Réinitialiser mon mot de passe</a><br>" +
                                 "Ce lien est valable %d minutes.<br><br>" +
                                 "Si vous n’êtes pas à l’origine de cette demande, merci d’ignorer ce message.<br>" +
                                 "Celui-ci a été généré automatiquement, merci de ne pas y répondre.",
-                        resetLink, TOKEN_EXPIRATION_MINUTES
+                        user.getUsername(), resetLink, TOKEN_EXPIRATION_MINUTES
                 );
             }
 

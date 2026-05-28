@@ -386,6 +386,7 @@
                         <div class="col-xl-9 col-lg-8 col-md-7 col-sm-7" style="margin-left: -10px">
                             <h:panelGroup rendered="#{conceptView.nodeCorpuses != null}">
                                 <ui:repeat var="corpus" value="#{conceptView.nodeCorpuses}" >
+
                                     <h:panelGroup rendered="#{(corpus.count != 0 and corpus.count!= -1) or (corpus.onlyUriLink)}">
                                         <div class="row">
                                             <h:panelGroup rendered="#{!corpus.onlyUriLink}">

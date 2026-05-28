@@ -1,6 +1,7 @@
 package fr.cnrs.opentheso.ws.api;
 
 import fr.cnrs.opentheso.entites.Preferences;
+import fr.cnrs.opentheso.models.concept.*;
 import fr.cnrs.opentheso.models.skosapi.SKOSXmlDocument;
 import fr.cnrs.opentheso.repositories.TermRepository;
 import fr.cnrs.opentheso.services.AlignmentService;
@@ -10,13 +11,9 @@ import fr.cnrs.opentheso.services.GroupService;
 import fr.cnrs.opentheso.services.NoteService;
 import fr.cnrs.opentheso.services.PathService;
 import fr.cnrs.opentheso.models.alignment.NodeAlignment;
-import fr.cnrs.opentheso.models.concept.NodeAutoCompletion;
 import fr.cnrs.opentheso.models.terms.NodeEM;
 import fr.cnrs.opentheso.models.nodes.NodeIdValue;
 import fr.cnrs.opentheso.models.terms.NodeRT;
-import fr.cnrs.opentheso.models.concept.Path;
-import fr.cnrs.opentheso.models.concept.NodeConcept;
-import fr.cnrs.opentheso.models.concept.NodeConceptTree;
 import fr.cnrs.opentheso.models.notes.NodeNote;
 import fr.cnrs.opentheso.models.terms.NodeTermTraduction;
 import fr.cnrs.opentheso.services.PreferenceService;
@@ -158,6 +155,10 @@ public class RestRDFHelper {
                 return null;
         }
 
+    }
+
+    public NodeFullConcept getNodeFullConcept(String idThesaurus, String idConcept, String lang) {
+        return conceptService.getConcept(idConcept, idThesaurus, lang, 0, 1, false);
     }
     
     public String getAllLinkedConceptsWithOntome__(String idTheso) {

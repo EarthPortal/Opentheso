@@ -25,6 +25,8 @@ import java.util.Set;
 
 public interface ConceptRepository extends JpaRepository<Concept, Integer> {
 
+
+
     @Modifying
     @Transactional
     @Query(value = """
@@ -171,13 +173,15 @@ public interface ConceptRepository extends JpaRepository<Concept, Integer> {
     @Modifying
     @Transactional
     @Query(value = """
-        UPDATE concept 
-        SET modified = CURRENT_DATE,
-            contributor = :contributor
-        WHERE id_thesaurus = :thesaurus
-          AND id_concept = :idConcept
-        """, nativeQuery = true)
-    int updateDateOfConcept(String thesaurus, String idConcept, int contributor);
+                UPDATE concept 
+                SET modified = CURRENT_DATE,
+                    contributor = :contributor
+                WHERE id_thesaurus = :thesaurus
+                  AND id_concept = :idConcept
+            """, nativeQuery = true)
+    int updateDateOfConcept(@Param("thesaurus") String thesaurus,
+                            @Param("idConcept") String idConcept,
+                            @Param("contributor") int contributor);
 
     @Modifying
     @Transactional
