@@ -67,13 +67,22 @@ public class DeleteThesaurusBean implements Serializable {
     public void deleteThesaurus(CurrentUser currentUser) throws IOException {
 
         /**
-         * Bloc qui permet de supprimer une liste de thésaurus à activer pour la maintenance ou migration
+         * Bloc qui permet de supprimer une liste de thésaurus.
+         * Ce bloc est à activer pour la maintenance ou migration
          */
+/*
 
-        /*
         List<String> ids = thesaurusService.getAllIdOfThesaurus(true);
 
-        List<String> idToKeep = Arrays.asList("th116", "th112");
+        //List<String> idToKeep = Arrays.asList("th116", "th112");
+        List<String> idToKeep = Arrays.asList(
+                "th361", "th366", "th368", "th369", "th371", "th372", "th373",
+                "th374", "th375", "th377", "th378", "th379", "th380", "th381",
+                "th382", "th383", "th384", "th385", "th740", "th742", "th743",
+                "th744", "th745", "th746", "th936", "th937", "th938", "th939",
+                "th940", "th941", "th942", "th943", "th944", "th945", "th946",
+                "th947", "th948", "th949", "th950", "th952", "th960", "th961",
+                "th962", "th1010", "th1028", "th1029", "th1076", "th1077");
 
         for (String id : ids) {
 
@@ -91,6 +100,61 @@ public class DeleteThesaurusBean implements Serializable {
                 return;
             }
         }*/
+
+        /**
+         * Ensuite, il faut appliquer ces requêtes SQL pour nettoyer les utilisateurs
+         * -- Vérification
+         SELECT DISTINCT urg.id_user
+         FROM user_role_group urg
+         WHERE NOT EXISTS (
+         SELECT 1
+         FROM user_group_thesaurus ugt
+         WHERE ugt.id_group = urg.id_group
+         );
+
+
+         DELETE FROM user_role_group urg
+         WHERE NOT EXISTS (
+         SELECT 1
+         FROM user_group_thesaurus ugt
+         WHERE ugt.id_group = urg.id_group
+         );
+
+
+         DELETE FROM user_group_label ugl
+         WHERE NOT EXISTS (
+         SELECT 1
+         FROM user_group_thesaurus ugt
+         WHERE ugt.id_group = ugl.id_group
+         );
+
+         DELETE FROM password_reset_token prt
+         WHERE prt.id_user IN (
+         SELECT u.id_user
+         FROM users u
+         WHERE NOT EXISTS (
+         SELECT 1
+         FROM user_role_group urg
+         WHERE urg.id_user = u.id_user
+         )
+         AND u.id_user != -1
+         AND u.issuperadmin IS NOT TRUE
+         );
+
+
+         DELETE FROM users u
+         WHERE NOT EXISTS (
+         SELECT 1
+         FROM user_role_group urg
+         WHERE urg.id_user = u.id_user
+         )
+         AND u.id_user != -1
+         AND u.issuperadmin IS NOT TRUE;
+
+         *
+         *
+         */
+
         /**
          * Fin de Bloc qui permet de supprimer une liste de thésaurus à activer pour la maintenance ou migration
          */

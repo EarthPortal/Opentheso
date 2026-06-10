@@ -533,7 +533,7 @@ public class TermService {
         return nonPreferredTermRepository.isAltLabelExist(title, idThesaurus, idLang);
     }
 
-    public PreferredTerm getPreferenceTermByThesaurusAndConcept(String idThesaurus, String idConcept) {
+    public PreferredTerm getPreferredTermByThesaurusAndConcept(String idThesaurus, String idConcept) {
 
         var preference = preferredTermRepository.findByIdThesaurusAndIdConcept(idThesaurus, idConcept);
         if(preference.isEmpty()) {

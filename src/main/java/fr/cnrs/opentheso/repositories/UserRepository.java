@@ -13,7 +13,8 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
 
-
+    @Query("SELECT u FROM User u WHERE LOWER(u.mail) = LOWER(:mail) AND u.password = :password")
+    Optional<User> findByMailAndPassword(@Param("mail") String mail, @Param("password") String password);
 
     // Retourne seulement userId et apikey pour tous les utilisateurs
     @Query("SELECT u.id, u.apiKey, u.username FROM User u")

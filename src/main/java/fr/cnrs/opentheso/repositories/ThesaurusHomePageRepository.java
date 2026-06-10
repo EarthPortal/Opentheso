@@ -13,10 +13,18 @@ import java.util.Optional;
 public interface ThesaurusHomePageRepository extends JpaRepository<ThesaurusHomePage, Integer> {
 
     Optional<ThesaurusHomePage> findByIdThesoAndLang(String idTheso, String lang);
+/*
+    @Modifying
+    @Transactional
+    void deleteAllByIdTheso(String idTheso);*/
 
     @Modifying
     @Transactional
-    void deleteAllByIdTheso(String idTheso);
+    @Query(
+            value = "DELETE FROM thesohomepage WHERE idtheso = :idTheso",
+            nativeQuery = true
+    )
+    int deleteAllByIdTheso(@Param("idTheso") String idTheso);
 
     @Modifying
     @Transactional

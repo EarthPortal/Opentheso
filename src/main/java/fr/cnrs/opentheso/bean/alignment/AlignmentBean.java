@@ -446,7 +446,7 @@ public class AlignmentBean implements Serializable {
                 alignment.getThesaurus_target(), alignment.getUri_target(), alignment.getAlignement_id_type(),
                 alignment.getInternal_id_concept(), idTheso, alignment.getId_source());
 
-        var preferredTerm = termService.getPreferenceTermByThesaurusAndConcept(selectedTheso.getCurrentIdTheso(), idConcept);
+        var preferredTerm = termService.getPreferredTermByThesaurusAndConcept(selectedTheso.getCurrentIdTheso(), idConcept);
         if (preferredTerm != null) {
             if (CollectionUtils.isNotEmpty(alignment.getSelectedTraductionsList())) {
                 for (SelectedResource selectedResource : alignment.getSelectedTraductionsList()) {
@@ -1604,7 +1604,7 @@ public class AlignmentBean implements Serializable {
     private boolean addTraductions__(String idTheso, String idConcept, int idUser) {
 
         Term term = new Term();
-        var preferredTerm = termService.getPreferenceTermByThesaurusAndConcept(selectedTheso.getCurrentIdTheso(), idConcept);
+        var preferredTerm = termService.getPreferredTermByThesaurusAndConcept(selectedTheso.getCurrentIdTheso(), idConcept);
         if (preferredTerm == null) {
             return false;
         }
