@@ -9,10 +9,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 public interface NoteHistoriqueRepository extends JpaRepository<NoteHistorique, Integer> {
+/*
+    @Modifying
+    @Transactional
+    void deleteAllByIdThesaurus(String idThesaurus);*/
 
     @Modifying
     @Transactional
-    void deleteAllByIdThesaurus(String idThesaurus);
+    @Query(
+            value = "DELETE FROM note_historique WHERE id_thesaurus = :idTheso",
+            nativeQuery = true
+    )
+    int deleteAllByIdThesaurus(@Param("idTheso") String idTheso);
+
+
 
     @Modifying
     @Transactional

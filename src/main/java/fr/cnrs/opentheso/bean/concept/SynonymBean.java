@@ -102,7 +102,7 @@ public class SynonymBean implements Serializable {
     public void addForced(int idUser) {
 
         log.debug("Recherche de preferred term");
-        var preferredTerm = termService.getPreferenceTermByThesaurusAndConcept(selectedTheso.getCurrentIdTheso(),
+        var preferredTerm = termService.getPreferredTermByThesaurusAndConcept(selectedTheso.getCurrentIdTheso(),
                 conceptBean.getNodeConcept().getConcept().getIdConcept());
 
         log.debug("Id du term {}", preferredTerm.getIdTerm());

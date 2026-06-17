@@ -54,6 +54,42 @@ public class UserService {
         return userRepository.findByMail(mail);
     }
 
+    public User findByMailAndPassword(String mail, String password) {
+        String matches = MD5Password.getEncodedPassword(password);
+
+        return userRepository.findByMailAndPassword(mail, matches)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public User findByMailAndPasswordMigrated(String mail, String rawPassword) {
+        Optional<User> userOpt = userRepository.findByMail(mail);
+        if (userOpt.isEmpty()) return null;
+
+        User user = userOpt.get();
+        String storedHash = user.getPassword();
+        boolean matches = false;
+        if(storedHash == null) {
+            return null;
+        }
+
+        if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$")) {
+            // mot de passe déjà en BCrypt
+            matches = passwordEncoder.matches(rawPassword, storedHash);
+        } else {
+            // mot de passe MD5
+            matches = MD5Password.getEncodedPassword(rawPassword).equals(storedHash);
+
+            // Migration vers BCrypt
+            if (matches) {
+                user.setPassword(passwordEncoder.encode(rawPassword));
+                userRepository.save(user);
+            }
+        }
+
+        return matches ? user : null;
+    }
+
+
     public NodeUser getUserById(Integer userId) {
 
         log.debug("Rechercher l'utilisateur avec id {}", userId);

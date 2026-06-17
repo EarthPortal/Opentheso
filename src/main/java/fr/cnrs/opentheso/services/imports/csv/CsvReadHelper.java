@@ -237,8 +237,7 @@ public class CsvReadHelper {
         return false;
     }
 
-
-    /**
+     /**
      * permet de lire un fichier CSV complet pour importer les alignements
      *
      * @param in
@@ -810,7 +809,7 @@ public class CsvReadHelper {
                     continue;
                 }
 
-                // on récupère les notes 
+                // on récupère les labels
                 conceptObject = getLabels(conceptObject, record, false);
 
                 if (conceptObject != null) {
@@ -822,7 +821,63 @@ public class CsvReadHelper {
             java.util.logging.Logger.getLogger(CsvReadHelper.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
-    }    
+    }
+
+    /**
+     * permet de lire un fichier CSV complet pour importer les notes avec option
+     * de vider les notes avant
+     *
+     * @param in
+     * @return
+     */
+    public boolean readFileTraduction(Reader in, String lang) {
+        try {
+            CSVFormat cSVFormat = CSVFormat.DEFAULT.builder().setHeader().setDelimiter(delimiter)
+                    .setIgnoreEmptyLines(true).setIgnoreHeaderCase(true).setTrim(true).build();
+            CSVParser cSVParser = cSVFormat.parse(in);
+
+            String idConcept;
+            nodeIdValues = new ArrayList<>();
+
+            for (CSVRecord record : cSVParser) {
+                NodeIdValue nodeIdValue = new NodeIdValue();
+                // setId, si l'identifiant n'est pas renseigné, on récupère un NULL
+                try {
+                    idConcept = record.get("localid");
+                    if (idConcept == null || idConcept.isEmpty()) {
+                        continue;
+                    }
+                    nodeIdValue.setId(idConcept);
+                } catch (Exception e) {
+                    continue;
+                }
+
+                // on récupère les labels
+                nodeIdValue = getPrefLabel(nodeIdValue, record, lang);
+
+                if (nodeIdValue != null) {
+                    nodeIdValues.add(nodeIdValue);
+                }
+            }
+            return true;
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(CsvReadHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    private NodeIdValue getPrefLabel(NodeIdValue nodeIdValue, CSVRecord record, String lang) {
+        String value;
+        try {
+            value = record.get("skos:prefLabel@" + lang.trim());
+            if(StringUtils.isNotEmpty(value)) {
+                nodeIdValue.setValue(value);
+                return nodeIdValue;
+            }
+        } catch (Exception e) {
+        }
+        return null;
+    }
 
     /**
      * permet de lire un fichier CSV complet pour importer les notes avec option
@@ -1063,6 +1118,30 @@ public class CsvReadHelper {
             java.util.logging.Logger.getLogger(CsvReadHelper.class.getName()).log(Level.SEVERE, null, ex);
         }
         return !langs.isEmpty();
+    }
+
+    public String getLangOfValue(Reader in) {
+        String lang = null;
+        try {
+            CSVFormat cSVFormat = CSVFormat.DEFAULT.builder().setHeader().setDelimiter(delimiter)
+                    .setIgnoreEmptyLines(true).setIgnoreHeaderCase(true).setTrim(true).build();
+            CSVParser cSVParser = cSVFormat.parse(in);
+            Map<String, Integer> headers = cSVParser.getHeaderMap();
+
+            String values[];
+            for (String columnName : headers.keySet()) {
+                if (columnName.contains("@")) {
+                    values = columnName.split("@");
+                    if (values[1] != null) {
+                        lang = values[1];
+                    }
+                }
+            }
+            return lang;
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(CsvReadHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
     /**

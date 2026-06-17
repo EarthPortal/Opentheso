@@ -18,9 +18,20 @@ public interface CandidatStatusRepository extends JpaRepository<CandidatStatus, 
 
     Optional<CandidatStatus> findAllByIdConceptAndIdThesaurus(String idConcept, String idThesaurus);
 
+    /*
     @Modifying
     @Transactional
     void deleteAllByIdThesaurus(String idThesaurus);
+*/
+
+    @Modifying
+    @Transactional
+    @Query(
+            value = "DELETE FROM candidat_status WHERE id_thesaurus = :idTheso",
+            nativeQuery = true
+    )
+    int deleteAllByIdThesaurus(@Param("idTheso") String idTheso);
+
 
     @Modifying
     @Transactional

@@ -93,7 +93,20 @@
                                          process="@this" ajax="true"
                                          action="#{importFileBean.init()}"
                                          style="font-size: 12px; color: #601e18" />                           
-                        <br/>                            
+                        <br/>
+
+                        <!--Pour importer des traductions -->
+                        <i class="pi pi-download"></i>
+                        <p:commandButton value="#{langueBean.getMsg('actions.importTraductions')}"
+                                         title="#{langueBean.getMsg('actions.importTraductionsTooltip')}"
+                                         styleClass="ui-button-flat"
+                                         oncomplete="PF('listTraductionCsv').show();"
+                                         update="idListTraductionCsv listTraductionCsvForm"
+                                         process="@this" ajax="true"
+                                         action="#{importFileBean.init()}"
+                                         style="font-size: 12px; color: #601e18" />
+                        <br/>
+
                         
                         <!--Pour importer des notes -->
                         <i class="pi pi-download"></i>
@@ -250,6 +263,7 @@
     <ui:include src="../dialog/import/listAltlabelCsv.xhtml" />      
     <ui:include src="../dialog/import/deleteListAltlabelCsv.xhtml" />      
     <ui:include src="../dialog/import/listArkCsv.xhtml" />
+    <ui:include src="../dialog/import/listTraductionCsv.xhtml" />
     <ui:include src="../dialog/import/listRelatedCsv.xhtml" />
     <ui:include src="../dialog/import/getArkFromConceptId.xhtml" />
     <ui:include src="../dialog/import/getIdConceptFromArkId.xhtml" />

@@ -258,16 +258,17 @@ public class CurrentUser implements Serializable {
                 user = user2.get();
             }
         } else {
-            // ancienne méthode d'authentification MD5, déprécié par #MR
-           // user = userService.findByUsernameAndPassword(username, password);
-
             // Passage en BCrypt
             user = userService.findByUsernameAndPasswordMigrated(username, password);
         }
 
         if (user == null) {
-            showErrorMessage("User or password wrong, please try again");
-            return;
+            // si la connexion échoue avec pseudo, on teste avec l'email
+            user = userService.findByMailAndPasswordMigrated(username, password);
+            if (user == null) {
+                showErrorMessage("User or password wrong, please try again");
+                return;
+            }
         }
 
         // on récupère le compte de l'utilisateur

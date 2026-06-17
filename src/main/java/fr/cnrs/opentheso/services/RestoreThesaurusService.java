@@ -283,7 +283,7 @@ public class RestoreThesaurusService {
         var allConcepts = conceptService.getAllIdConceptOfThesaurus(idThesaurus);
         for (String idConcept : allConcepts) {
             var concept = conceptService.getConcept(idConcept, idThesaurus);
-            var preferredTerm = termService.getPreferenceTermByThesaurusAndConcept(idThesaurus, idConcept);
+            var preferredTerm = termService.getPreferredTermByThesaurusAndConcept(idThesaurus, idConcept);
 
             if (preferredTerm != null) {
                 var term = termService.getTermByIdAndThesaurusAndLang(preferredTerm.getIdTerm(), idThesaurus, workLanguage);
