@@ -1,5 +1,6 @@
 package fr.cnrs.opentheso.ws.openapi.filter;
 
+import fr.cnrs.opentheso.bean.menu.users.CurrentUser;
 import fr.cnrs.opentheso.services.UserService;
 import fr.cnrs.opentheso.entites.User;
 import fr.cnrs.opentheso.services.security.SsoTokenService;
@@ -29,21 +30,27 @@ public class SsoTokenFilter implements Filter {
         String ssoToken = request.getParameter("ssoToken");
 
         if (ssoToken != null && !ssoToken.isBlank()) {
-
             Integer userId = ssoTokenService.validateAndConsumeToken(ssoToken);
-
             if (userId != null) {
-                User user = userService.findById(userId).orElse(null);
+                HttpSession session = request.getSession(true);
+                session.setAttribute("ssoUserId", userId);
+                session.setAttribute("ssoProcessed", false);
 
-                if (user != null) {
-                    HttpSession session = request.getSession(true);
-                    session.setAttribute("userConnected", user);
-                    session.setAttribute("isLogged", true);
+                // Récupérer idc et idt depuis l'URL
+                String idc = request.getParameter("idc");
+                String idt = request.getParameter("idt");
 
-                    log.info("SSO login réussi pour userId : {}", userId);
-                    response.sendRedirect(request.getContextPath() + "/index.xhtml");
-                    return;
+                if (idc != null && !idc.isBlank()) session.setAttribute("ssoIdc", idc);
+                if (idt != null && !idt.isBlank()) session.setAttribute("ssoIdt", idt);
+
+                // Construire la redirection finale avec idc et idt
+                StringBuilder redirect = new StringBuilder(request.getContextPath() + "/index.xhtml");
+                if (idc != null && idt != null) {
+                    redirect.append("?idc=").append(idc).append("&idt=").append(idt);
                 }
+
+                response.sendRedirect(redirect.toString());
+                return;
             }
 
             log.warn("SSO token invalide ou expiré : {}", ssoToken);

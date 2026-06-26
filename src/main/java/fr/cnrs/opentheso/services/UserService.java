@@ -1,5 +1,6 @@
 package fr.cnrs.opentheso.services;
 
+import fr.cnrs.opentheso.bean.menu.users.CurrentUser;
 import fr.cnrs.opentheso.entites.User;
 import fr.cnrs.opentheso.entites.UserGroupLabel;
 import fr.cnrs.opentheso.entites.UserGroupThesaurus;
@@ -48,6 +49,7 @@ public class UserService {
     private final UserGroupThesaurusRepository userGroupThesaurusRepository;
     private final PasswordEncoder passwordEncoder; // BCrypt
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final CurrentUser currentUser;
 
 
     public Optional<User> findByMail(String mail) {
