@@ -19,7 +19,9 @@ primefaces:
 
 app:
   security:
-    keycloak-enabled: false  # ou false pour désactiver
+    keycloak-enabled: ${KEYCLOAK_ENABLED:false}  # true pour activer le SSO Gaia Data
+    # client-id OIDC déclaré dans Keycloak ; sert à lire les rôles dans resource_access.<client-id>.roles
+    client-id: ${OIDC_CLIENT_ID:earthdata-earthportal-opentheso}
   neo4j:
     enabled: false
 
@@ -57,6 +59,25 @@ spring:
       enabled: true
       path: /graphiql
       endpoint: /graphql
+
+  # Connexion KeyCloak / SSO Gaia Data
+  # Le secret est injecté via la variable d'environnement OIDC_CLIENT_SECRET (jamais committé).
+  # Pré-requis Keycloak : enregistrer l'URI de redirection {baseUrl}/login/oauth2/code/keycloak
+  # Note : l'issuer (issuer-uri) doit être joignable au démarrage de l'application.
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: ${OIDC_CLIENT_ID:earthdata-earthportal-opentheso}
+            client-secret: ${OIDC_CLIENT_SECRET:}
+            provider: keycloak
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+            scope: openid, profile, email, roles
+        provider:
+          keycloak:
+            issuer-uri: ${OIDC_ISSUER_URI:https://sso.earth-data.fr/realms/gaia-data}
 
 settings:
   workLanguage: fr

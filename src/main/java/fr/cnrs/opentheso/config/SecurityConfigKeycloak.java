@@ -37,6 +37,7 @@ public class SecurityConfigKeycloak {
 
     private final CurrentUser currentUser;
     private final UserRepository userRepository;
+    private final AppConfig appConfig;
 
 
     @Bean
@@ -111,17 +112,40 @@ public class SecurityConfigKeycloak {
             for (GrantedAuthority authority : authorities) {
                 if (authority instanceof OidcUserAuthority oidcUserAuthority) {
                     Map<String, Object> attributes = oidcUserAuthority.getAttributes();
-                    Map<String, Object> realmAccess = (Map<String, Object>) attributes.get("realm_access");
-                    if (realmAccess != null) {
-                        List<String> roles = (List<String>) realmAccess.get("roles");
-                        for (String role : roles) {
-                            mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
-                        }
+                    for (String role : extractRoles(attributes)) {
+                        mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
                     }
                 }
             }
             return mappedAuthorities;
         };
+    }
+
+    /**
+     * Récupère les rôles du token OIDC.
+     * Priorité aux rôles du client (resource_access.&lt;client-id&gt;.roles), tel que recommandé
+     * par le SSO Gaia Data ; à défaut, fallback sur les rôles realm (realm_access.roles).
+     */
+    @SuppressWarnings("unchecked")
+    private List<String> extractRoles(Map<String, Object> attributes) {
+        String clientId = appConfig.getClientId();
+
+        // 1) Rôles du client : resource_access.<client-id>.roles
+        if (StringUtils.isNotBlank(clientId)
+                && attributes.get("resource_access") instanceof Map<?, ?> resourceAccess
+                && resourceAccess.get(clientId) instanceof Map<?, ?> client
+                && client.get("roles") instanceof List<?> clientRoles) {
+            return (List<String>) clientRoles;
+        }
+
+        // 2) Fallback : rôles realm : realm_access.roles
+        if (attributes.get("realm_access") instanceof Map<?, ?> realmAccess
+                && realmAccess.get("roles") instanceof List<?> realmRoles) {
+            return (List<String>) realmRoles;
+        }
+
+        log.warn("Aucun rôle trouvé dans le token OIDC (ni resource_access.{}.roles ni realm_access.roles)", clientId);
+        return List.of();
     }
 }
 
