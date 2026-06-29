@@ -93,7 +93,7 @@ public class SecurityConfigKeycloak {
                     }
                 }
             }
-            response.sendRedirect("/");
+            response.sendRedirect(request.getContextPath() + "/");
         };
     }
 
@@ -101,7 +101,7 @@ public class SecurityConfigKeycloak {
     public AuthenticationFailureHandler authenticationFailureHandler() {
         return (request, response, exception) -> {
             // Rediriger vers une page d'erreur JSF
-            response.sendRedirect("/authFailure");
+            response.sendRedirect(request.getContextPath() + "/authFailure");
         };
     }
 
