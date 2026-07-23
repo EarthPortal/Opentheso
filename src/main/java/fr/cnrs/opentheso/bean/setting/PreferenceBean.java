@@ -150,7 +150,7 @@ public class PreferenceBean implements Serializable {
         if (uriType == null) {
             return;
         }
-        if(preferenceService.isPreferredNameExist(preferences.getPreferredName())){
+        if(preferenceService.isPreferredNameExist(preferences.getIdThesaurus(), preferences.getPreferredName())){
             MessageUtils.showErrorMessage("PreferredName existe déjà, veuillez en choisir un autre ! ");
             return;
         }

@@ -13,10 +13,20 @@ import java.util.Optional;
 
 public interface PreferencesRepository extends JpaRepository<Preferences, Integer> {
 
-    boolean existsByPreferredName(String preferredName);
+    @Query("""
+            SELECT COUNT(p) > 0
+            FROM Preferences p
+            WHERE p.preferredName = :preferredName
+              AND p.idThesaurus <> :idThesaurus
+            """)
+    boolean existsInAnotherThesaurus(
+            @Param("idThesaurus") String idThesaurus,
+            @Param("preferredName") String preferredName
+            );
+
+
 
     Optional<Preferences> findByIdThesaurus(String idThesaurus);
-
 
     @Query("""
     select p.idThesaurus
