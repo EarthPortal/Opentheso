@@ -185,27 +185,27 @@
                                     <h:outputText rendered="#{!status.last}" value=" , " style="color: #FF7979; font-size: 14px;"/>
                                 </ui:repeat>                                
                                 <br/>
-                                <ui:repeat var="em2" value="#{conceptView.nodeFullConcept.hiddenLabels}" varStatus="status1">
-                                    <h:outputText value="(#{em2.idLang})" style="font-size: 14px; font-weight: 300;"/>
-                                    <h:outputText value=" #{em2.label}" 
-                                                  title="#{langueBean.getMsg('rightbody.concept.hidden_synonym')}"
-                                                  styleClass="textOpentheso" style="color:#FF7979; font-style: italic; font-size: 14px;"/>     
-                                    <h:outputText rendered="#{!status1.last or conceptView.nodeFullConcept.hiddenLabelTraduction.size() != 0}" value=" , " style="color: #FF7979; font-size: 14px;"/>
-                                </ui:repeat>
-                                <ui:repeat var="em3" value="#{conceptView.nodeFullConcept.hiddenLabelTraduction}" varStatus="status1">
-                                    <h:outputText value="(#{em3.idLang})" style="font-size: 14px; font-weight: 300;"/>
-                                    <h:outputText value=" #{em3.label}" 
-                                                  title="#{langueBean.getMsg('rightbody.concept.hidden_synonym')}"
-                                                  styleClass="textOpentheso" style="color:#FF7979; font-style: italic; font-size: 14px;"/>     
-                                    <h:outputText rendered="#{!status1.last}" value=" , " style="color: #FF7979; font-size: 14px;"/>
-                                </ui:repeat>                                
+                                <h:panelGroup rendered="#{currentUser.nodeUser.idUser != null}">
+                                    <ui:repeat var="em2" value="#{conceptView.nodeFullConcept.hiddenLabels}" varStatus="status1">
+                                        <h:outputText value="(#{em2.idLang})" style="font-size: 14px; font-weight: 300;"/>
+                                        <h:outputText value=" #{em2.label}"
+                                                      title="#{langueBean.getMsg('rightbody.concept.hidden_synonym')}"
+                                                      styleClass="textOpentheso" style="color:#FF7979; font-style: italic; font-size: 14px;"/>
+                                        <h:outputText rendered="#{!status1.last or conceptView.nodeFullConcept.hiddenLabelTraduction.size() != 0}" value=" , " style="color: #FF7979; font-size: 14px;"/>
+                                    </ui:repeat>
+                                    <ui:repeat var="em3" value="#{conceptView.nodeFullConcept.hiddenLabelTraduction}" varStatus="status1">
+                                        <h:outputText value="(#{em3.idLang})" style="font-size: 14px; font-weight: 300;"/>
+                                        <h:outputText value=" #{em3.label}"
+                                                      title="#{langueBean.getMsg('rightbody.concept.hidden_synonym')}"
+                                                      styleClass="textOpentheso" style="color:#FF7979; font-style: italic; font-size: 14px;"/>
+                                        <h:outputText rendered="#{!status1.last}" value=" , " style="color: #FF7979; font-size: 14px;"/>
+                                    </ui:repeat>
+                                </h:panelGroup>
                                 
                                 
                             </h:panelGroup>                        
                         </h:panelGroup>
-                            
-                                                  
-                        
+
                         <h:panelGroup rendered="#{!conceptView.toggleSwitchAltLabelLang}">
                             <h:panelGroup rendered="#{conceptView.nodeFullConcept.altLabels.size() != 0 or conceptView.nodeFullConcept.hiddenLabels.size() != 0}">
                                 <ui:repeat var="emw" value="#{conceptView.nodeFullConcept.altLabels}" varStatus="status">
@@ -213,16 +213,17 @@
                                     <h:outputText rendered="#{!status.last}" value=" , " style="color: #FF7979; font-size: 14px;"/>
                                 </ui:repeat>
                                 <br/>
-                                <ui:repeat var="emh" value="#{conceptView.nodeFullConcept.hiddenLabels}" varStatus="status1">
-                                    <h:outputText value=" #{emh.label}" 
-                                                  title="#{langueBean.getMsg('rightbody.concept.hidden_synonym')}"
-                                                  styleClass="textOpentheso" style="color:#FF7979; font-style: italic; font-size: 14px;"/>     
-                                    <h:outputText rendered="#{!status1.last}" value=" , " style="color: #FF7979; font-size: 14px;"/>
-                                </ui:repeat>
+                                <h:panelGroup rendered="#{currentUser.nodeUser.idUser != null}">
+                                    <ui:repeat var="emh" value="#{conceptView.nodeFullConcept.hiddenLabels}" varStatus="status1">
+                                        <h:outputText value=" #{emh.label}"
+                                                      title="#{langueBean.getMsg('rightbody.concept.hidden_synonym')}"
+                                                      styleClass="textOpentheso" style="color:#FF7979; font-style: italic; font-size: 14px;"/>
+                                        <h:outputText rendered="#{!status1.last}" value=" , " style="color: #FF7979; font-size: 14px;"/>
+                                    </ui:repeat>
+                                </h:panelGroup>
                             </h:panelGroup>                              
                         </h:panelGroup>
-                        
-                        
+
                     </div>
 
                     <div class="col-xl-1 col-lg-1 col-md-1 col-sm-1" style="text-align: right ">

@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,6 @@ public class RedirectController {
 
     @Autowired
     private RestRDFHelper restRDFHelper;
-
 
     /**
      * permet de rediriger les URI ARK vers la bonne URL
@@ -100,7 +98,4 @@ public class RedirectController {
         String newUrl = requestUrl.replace("/openapi/v1/redirect/" +idThesaurus, "/") + "?idt=" + idThesaurus;
         return ResponseEntity.status(307).location(new URI(newUrl)).build();
     }
-
-
-
 }

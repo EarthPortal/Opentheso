@@ -7,14 +7,45 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 
 public interface PreferencesRepository extends JpaRepository<Preferences, Integer> {
 
-    boolean existsByPreferredName(String preferredName);
+    @Modifying
+    @Transactional
+    @Query("""
+    UPDATE Preferences p
+    SET p.preferredName = :preferredName
+    WHERE p.idThesaurus = :idThesaurus
+    """)
+    int updatePreferredName(
+            @Param("idThesaurus") String idThesaurus,
+            @Param("preferredName") String preferredName);
+
+    @Query("""
+            SELECT COUNT(p) > 0
+            FROM Preferences p
+            WHERE p.preferredName = :preferredName
+              AND p.idThesaurus <> :idThesaurus
+            """)
+    boolean existsInAnotherThesaurus(
+            @Param("idThesaurus") String idThesaurus,
+            @Param("preferredName") String preferredName
+            );
+
+
 
     Optional<Preferences> findByIdThesaurus(String idThesaurus);
+
+    @Query("""
+    select p.idThesaurus
+    from Preferences p
+    where p.preferredName = :preferredName
+    """)
+    String findIdThesaurusByPreferredName(@Param("preferredName") String preferredName);
+
 
     @Transactional
     @Modifying
