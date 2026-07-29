@@ -120,7 +120,7 @@ public class ImportRdf4jHelper {
     private List<String> idGroups = new ArrayList<>();
     private int idUser, idGroupUser;
     private List<String> idLangsFound = new ArrayList<>(), hasTopConcceptList = new ArrayList<>();;
-    private String langueSource, formatDate, selectedIdentifier, prefixHandle, prefixDoi;
+    private String langueSource, formatDate, selectedIdentifier, prefixHandle, prefixDoi, persistentName;
     private Preferences nodePreference;
     private StringBuilder message = new StringBuilder();
     private HashMap<String, String> memberHashMap = new HashMap<>();
@@ -226,7 +226,12 @@ public class ImportRdf4jHelper {
         langueSource = StringUtils.isEmpty(langueSource) ? "fr" : langueSource;
         preferenceService.initPreferences(idThesaurus, langueSource);
         nodePreference = preferenceService.getThesaurusPreferences(idThesaurus);
-        nodePreference.setPreferredName(idThesaurus);
+        if(StringUtils.isBlank(persistentName)){
+            nodePreference.setPreferredName(idThesaurus);
+        } else {
+            nodePreference.setPreferredName(persistentName);
+        }
+
         if (selectedIdentifier.equalsIgnoreCase("ark")) {
             nodePreference.setOriginalUriIsArk(true);
         }
@@ -245,7 +250,12 @@ public class ImportRdf4jHelper {
             return;
         }
         nodePreference.setCheminSite(uri+"/");
-        nodePreference.setPreferredName(idTheso);
+        if(StringUtils.isNotBlank(persistentName)){
+            nodePreference.setPreferredName(persistentName);
+        } else {
+            nodePreference.setPreferredName(idTheso);
+        }
+
         nodePreference.setOriginalUri(uri);
         preferenceService.updateAllPreferenceUser(nodePreference);
     }

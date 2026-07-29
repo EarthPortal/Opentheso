@@ -45,8 +45,11 @@ public class SsoTokenFilter implements Filter {
 
                 // Construire la redirection finale avec idc et idt
                 StringBuilder redirect = new StringBuilder(request.getContextPath() + "/index.xhtml");
-                if (idc != null && idt != null) {
-                    redirect.append("?idc=").append(idc).append("&idt=").append(idt);
+                if (idt != null && !idt.isBlank()) {
+                    redirect.append("?idt=").append(idt);
+                    if (idc != null && !idc.isBlank()) {
+                        redirect.append("&idc=").append(idc);
+                    }
                 }
 
                 response.sendRedirect(redirect.toString());
