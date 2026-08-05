@@ -38,7 +38,7 @@ async function connecter(idConcept, idThesaurus) {
  */
 
 
-//@CrossOrigin(origins = "*") // à restreindre en production
+@CrossOrigin(origins = "*") // à restreindre en production
 @RestController
 @RequestMapping("/api/v2/auth")
 @RequiredArgsConstructor
