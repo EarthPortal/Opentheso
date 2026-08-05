@@ -46,12 +46,15 @@ public class SecurityConfigKeycloak {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/login", "/logout", "/oauth2/**",
                                 "/javax.faces.resource/**",
-                                "/openapi/v1/**")
+                                "/openapi/v1/**",
+                                "/api/v2/auth/token")
                         .permitAll()
                         .anyRequest().permitAll())
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
                                 new AntPathRequestMatcher("/openapi/v1/**"),
+                                new AntPathRequestMatcher("/api/v2/auth/token"),
+                                new AntPathRequestMatcher("/api/v2/**"),
                                 request -> request.getServletPath().endsWith(".xhtml")
                         )
                 )
