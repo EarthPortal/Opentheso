@@ -9,6 +9,7 @@ import fr.cnrs.opentheso.utils.MD5Password;
 import fr.cnrs.opentheso.services.ApiKeyService;
 import fr.cnrs.opentheso.ws.openapi.helper.ApiKeyState;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 
-
+@Hidden
 @Slf4j
 @RestController
 @AllArgsConstructor
@@ -47,7 +48,7 @@ public class UserController {
     private final UserRoleGroupService userRoleGroupService;
     private final UserService userService;
 
-
+    @Hidden
     @PostMapping("/authentification")
     @Operation(summary = "Authentification d'un utilisateur")
     public ResponseEntity createUser(@RequestBody @Valid AuthentificationDto authentificationDto) {
@@ -70,7 +71,7 @@ public class UserController {
         return ResponseEntity.ok().body(user);
     }
 
-
+    @Hidden
     @PostMapping
     @Operation(summary = "Créer un nouveau utilisateur")
     public ResponseEntity createUser(@RequestHeader(value = "API-KEY") String apiKey,
@@ -101,7 +102,7 @@ public class UserController {
         }
     }
 
-
+    @Hidden
     @DeleteMapping("/{idUser}")
     @Operation(summary = "Supprimer un utilisateur")
     public ResponseEntity deleteUser(@RequestHeader(value = "API-KEY") String apiKey,
@@ -120,7 +121,7 @@ public class UserController {
         }
     }
 
-
+    @Hidden
     @PutMapping("/{idUser}")
     @Operation(summary = "Modifier un utilisateur")
     public ResponseEntity updateUser(@RequestHeader(value = "API-KEY") String apiKey,
@@ -163,7 +164,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("");
         }
     }
-
+    @Hidden
     @PutMapping("/api-key/{idUser}")
     @Operation(summary = "Modifier un utilisateur")
     public ResponseEntity generateApiKey(@RequestHeader(value = "API-KEY") String apiKey,

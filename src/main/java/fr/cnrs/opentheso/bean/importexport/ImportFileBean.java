@@ -120,7 +120,7 @@ public class ImportFileBean implements Serializable {
     private String formatDate = "yyyy-MM-dd";
     private String selectedIdentifier = "sans";
     private String prefixHandle, selectedIdentifierImportAlign, prefixDoi, uri, thesaurusName, selectedUserProject,
-            selectedConcept, alignmentSource, selectedLang, fileName, selectedSearchType, idLang;
+            selectedConcept, alignmentSource, selectedLang, fileName, selectedSearchType, idLang, persistentNameTheso;
     private boolean loadDone, BDDinsertEnable, importDone, importInProgress, isCandidatImport, haveError, clearBefore;
     private char delimiterCsv = ',';
     private int choiceDelimiter = 0;
@@ -143,6 +143,7 @@ public class ImportFileBean implements Serializable {
 
 
     public void init() {
+        persistentNameTheso = null;
         selectedSearchType = "exactWord"; // containsExactWord, startWith, elastic
         selectedIdentifierImportAlign = "identifier";
         choiceDelimiter = 0;
@@ -1388,6 +1389,10 @@ public class ImportFileBean implements Serializable {
         var idNewTheso = csvImportHelper.createThesaurus(thesaurusName, selectedLang, idProject, currentUser.getNodeUser());
         if (StringUtils.isEmpty(idNewTheso)) {
             return;
+        }
+
+        if(StringUtils.isEmpty(persistentNameTheso)) {
+            preferenceService.initPreferences(idNewTheso, persistentNameTheso);
         }
 
         csvImportHelper.addLangsToThesaurus(langs, idNewTheso);
@@ -3326,6 +3331,7 @@ public class ImportFileBean implements Serializable {
         importRdf4jHelper.setInfos(formatDate, currentUser.getNodeUser().getIdUser(), idGroup, selectedLang);
         importRdf4jHelper.setSelectedIdentifier(selectedIdentifier);
         importRdf4jHelper.setPrefixHandle(prefixHandle);
+        importRdf4jHelper.setPersistentName(persistentNameTheso);
         importRdf4jHelper.setPrefixDoi(prefixDoi);
         importRdf4jHelper.setNodePreference(roleOnThesoBean.getNodePreference());
         importRdf4jHelper.setRdf4jThesaurus(sKOSXmlDocument);
@@ -3335,6 +3341,9 @@ public class ImportFileBean implements Serializable {
             error.append(importRdf4jHelper.getMessage());
             showError();
             return;
+        }
+        if (StringUtils.isNotBlank(persistentNameTheso)) {
+            preferenceService.updatePersistentNameTheso(idTheso, persistentNameTheso);
         }
 
         for (SKOSResource sKOSResource : sKOSXmlDocument.getConceptList()) {
@@ -3459,6 +3468,14 @@ public class ImportFileBean implements Serializable {
         info = "";
         error = new StringBuffer();
         warning = "";
+    }
+
+    public String getPersistentNameTheso() {
+        return persistentNameTheso;
+    }
+
+    public void setPersistentNameTheso(String persistentNameTheso) {
+        this.persistentNameTheso = persistentNameTheso;
     }
 
     public String getFormatDate() {

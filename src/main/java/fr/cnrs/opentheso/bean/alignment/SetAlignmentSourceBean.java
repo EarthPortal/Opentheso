@@ -226,7 +226,7 @@ public class SetAlignmentSourceBean implements Serializable {
 
 
         if(!testNewSourceAlignment(sourceUri)) {
-            MessageUtils.showWarnMessage("Uri du serveur non valide !");
+            MessageUtils.showWarnMessage("Ce serveur ne répond pas !");
             return;
         }
         
@@ -251,7 +251,7 @@ public class SetAlignmentSourceBean implements Serializable {
     
     private boolean testNewSourceAlignment(String uri) throws Exception {
 
-        var url = new URL(uri + "/api/ping");
+        var url = new URL(uri + "/openapi/v1/ping");
         var connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         return HTTP_OK == connection.getResponseCode();
